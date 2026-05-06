@@ -1,0 +1,11 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"veterinaria_sistemasenoferta"},
+{"type":"table","name":"producto","database":"veterinaria_sistemasenoferta","data":
+[
+{"id_pro":"9","nombre_pro":"UNO","descripcion":"INOINLKNLK","unidad":"kilo","precio_venta":"12","precio_compra":"12","imagen":"pandy2.png","stock":"12","estado":"d"},
+{"id_pro":"10","nombre_pro":"cepillo pet double brush ","descripcion":"cepillo doble mango rojo","unidad":"1","precio_venta":"20","precio_compra":"11","imagen":"","stock":"3","estado":"d"},
+{"id_pro":"11","nombre_pro":"cepillo pet double brush ","descripcion":"cepillo doble mango de goma","unidad":"1","precio_venta":"20","precio_compra":"11","imagen":"","stock":"3","estado":"a"}
+]
+}
+]

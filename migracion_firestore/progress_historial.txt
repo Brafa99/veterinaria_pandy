@@ -1,0 +1,99 @@
+const fs = require("fs");
+const admin = require("firebase-admin");
+
+admin.initializeApp({
+  credential: admin.credential.cert(require("./serviceAccountKey.json"))
+});
+
+const db = admin.firestore();
+
+const FILE = "historial_12000.json";
+const PROGRESS_FILE = "progress_historial.txt";
+
+const BATCH_SIZE = 100;
+const DELAY = 1000;
+
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// ---------------- PROGRESS ----------------
+function loadProgress() {
+  if (!fs.existsSync(PROGRESS_FILE)) return 0;
+  return parseInt(fs.readFileSync(PROGRESS_FILE, "utf8")) || 0;
+}
+
+function saveProgress(index) {
+  fs.writeFileSync(PROGRESS_FILE, String(index));
+}
+
+// ---------------- DATE ----------------
+function toTimestamp(v) {
+  if (!v || v === "0000-00-00") {
+    return admin.firestore.Timestamp.now();
+  }
+
+  const d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return admin.firestore.Timestamp.now();
+  }
+
+  return admin.firestore.Timestamp.fromDate(d);
+}
+
+// ---------------- MAIN ----------------
+async function run() {
+  console.log("🚀 MIGRACIÓN HISTORIAL RESUMIBLE");
+
+  const data = JSON.parse(fs.readFileSync(FILE));
+
+  let start = loadProgress();
+
+  console.log("📌 Reanudando desde:", start);
+  console.log("📦 Total:", data.length);
+
+  let batch = db.batch();
+  let ops = 0;
+
+  for (let i = start; i < data.length; i++) {
+    const h = data[i];
+
+    const ref = db.collection("historial").doc(String(h.id_historial));
+
+    batch.set(ref, {
+      id_historial: String(h.id_historial),
+      id_cliente: String(h.id_cliente),
+
+      descripcion: h.descripcion || "",
+      tipo_servicio: h.tipo_historial || "General",
+      precioh: Number(h.precioh) || 0,
+
+      fecha_registro: toTimestamp(h.fecha_registro),
+
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+
+    ops++;
+
+    if (ops >= BATCH_SIZE) {
+      await batch.commit();
+
+      console.log(`✔ ${i}/${data.length}`);
+
+      saveProgress(i);
+
+      batch = db.batch();
+      ops = 0;
+
+      await sleep(DELAY);
+    }
+  }
+
+  if (ops > 0) {
+    await batch.commit();
+  }
+
+  saveProgress(data.length);
+
+  console.log("✅ MIGRACIÓN COMPLETA");
+}
+
+run().catch(console.error);

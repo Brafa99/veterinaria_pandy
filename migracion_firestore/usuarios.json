@@ -1,0 +1,10 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"veterinaria_sistemasenoferta"},
+{"type":"table","name":"usuario","database":"veterinaria_sistemasenoferta","data":
+[
+{"id":"5","usuario":"admin","password":"a1Bz20ydqelm8m1wql5cbf59eb4e923f3dbb5e3225dea0abb1","imagen":"logo 2021.png","tipo":"administrador","nombre":"veterinaria pandy","apellido":"peluquerÃ­a canina","telefono":"63003036","correo":"sistemasenoferta@gmail.com"},
+{"id":"13","usuario":"kanu","password":"5e8ff9bf55ba3508199d22e984129be6","imagen":"","tipo":"empleado","nombre":"Herlan","apellido":"Martinez Delboy","telefono":"77300817","correo":"herlan@gmail.com"}
+]
+}
+]

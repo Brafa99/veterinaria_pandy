@@ -1,0 +1,59 @@
+{
+  "usuarios": [
+    {
+      "id": 5,
+      "usuario": "admin",
+      "password": "a1Bz20ydqelm8m1wql21232f297a57a5a743894a0e4a801fc3",
+      "imagen": "1.jpg",
+      "tipo": "administrador",
+      "nombre": "sf",
+      "apellido": "fdf",
+      "telefono": "",
+      "correo": "sistemasenoferta@gmail.com"
+    },
+    {
+      "id": 6,
+      "usuario": "empleado",
+      "password": "a1Bz20ydqelm8m1wql088ef99bff55c67dc863f83980a66a9b",
+      "imagen": "",
+      "tipo": "empleado",
+      "nombre": "fredy",
+      "apellido": "mercury",
+      "telefono": "345543",
+      "correo": "mercury@gmail.com"
+    },
+    {
+      "id": 9,
+      "usuario": "vinicius",
+      "password": "a1Bz20ydqelm8m1wql7fa81ff5e6a88a34ca2392240268c68f",
+      "imagen": "",
+      "tipo": "empleado",
+      "nombre": "vinicius jr",
+      "apellido": "vinicius",
+      "telefono": "423424",
+      "correo": "vinicius@gmail.com"
+    },
+    {
+      "id": 10,
+      "usuario": "sergio",
+      "password": "a1Bz20ydqelm8m1wql202cb962ac59075b964b07152d234b70",
+      "imagen": "",
+      "tipo": "administrador",
+      "nombre": "sergio",
+      "apellido": "bumburi",
+      "telefono": "2432432",
+      "correo": "sergio@gmail.com"
+    },
+    {
+      "id": 11,
+      "usuario": "cliente",
+      "password": "a1Bz20ydqelm8m1wql4983a0ab83ed86e0e7213c8783940193",
+      "imagen": "",
+      "tipo": "cliente",
+      "nombre": "956454334",
+      "apellido": "mamani",
+      "telefono": "9879879",
+      "correo": "cliente@gmail.com"
+    }
+  ]
+}
