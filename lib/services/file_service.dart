@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:veterinaria_pandy/services/filer_service_web.dart';
+import 'file_service_stub.dart'
+    if (dart.library.html) 'filer_service_web.dart';
 
 class FileService {
   static Future<void> saveOrDownload(
