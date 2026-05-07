@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "veterinariapandy-73c5d",
+  "private_key_id": "6bfede3900b1439f9d9246e291a0f75a2739e0db",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC3YlYiPkwBetNb\nQKvLxApRPmKku7tcP5iTULst2TPA1zQGExQ3E66tfZa0LS6kr99c29Hz4xM2dNZ+\nT0wKUBmXb9uyCEhVdPpzD3OAzcVFqjIx7+cRMayVoX4t3FcYczIEnmLa7y5N/ufe\nQz9Kjn4rT7j6duK0/T7pc03rK5nJRDKrQoqaEPKAhxJ1u1lBVNw+YT/Qf0DF8YrD\nFyYfuESyca3Cv2a0+BoxTxIHh31Sx9qCtmYfQ28EVDH+1ORMuOxvUiH3u2z4An6a\nQy6NWgxSNwfAexHN76fAdD3XDvdkjYqIMScaL2ozSwFBDYm/uUqlqODnhWflO93T\n5tnRFsU5AgMBAAECggEAA4C63CDsKxO8CXWvnQ72aCffaCh32I1pw4Kaw1zvP/iR\ns1NWTa5au1Ch+iNqIoDY1468BhhpIQn+oN9bOKU1X+77N32GAtqJqtH5kapx4WCc\ntdclxu53zqHiOvZcVDNlxLB70JUaAX5kJ8WJZh9Y/0h2Dulfb41Det/Ay28D8H63\nMdmHLejIeoJyrXIXduMGh1cAmrjo2GUkatyc0zBeQDU4aY9MRlykxGZWwdqo71JU\nV3lU2PuqVSqAqBiA46U8gs7tRqHES2B6MPrx6hSjKeuGxCUZrgn/+ZVFQkQByf0Q\ny8AMVb5F7shvUbavX11rw1PHZyBvVHvLcimKRKsLCwKBgQDn0Yr6GmbXjf6Gbnvs\nw159mI/59paoHp20GgAYwNH40OQBPm5dLEXMZuX6LNSyb8KI4XSQpYdebO2NMoAM\n4p60Kc2MW3oauiE9eO/aPLop4a/OqyZu4eYmUjWQMHXFQei5QusRNncf2SI3rRTu\n0XfV0p4/AhP/cSsotJge4kp4AwKBgQDKg2gTfmk7xykKkUOrJEHQPa+/CirxWCeI\n0DYqjXO4dH4beBJbkvAsPmiVeug1z15p1c/2vqYEODSuA8CU/VnSSPkZIEBQVndy\nHdrvN/AIXNK/Z6KWNupid0t97TugObbBW3W3dAG0PNc0gE3dNmsUfPj22ewDwPdC\n/Gi3RwKfEwKBgFfUPjFv21MDy1EnfvA/PQecy7/Ku13K67kWuL6oH2WDzz7hZnMK\nmQ9OVQeqAJPyX+P4d29uJ5GQ95etcHJxUeu0gtoQtnx11K4zqbwnkejYRwGoOpF8\nKPSP5RdSJOytgfze66zD0/JPE/XAL9QjrKFogOgiY20+dTmg4pmg5tH9AoGALqEH\nK8XlkSAQcSB1hkh45uvtNX2v2ZZEtBnM/wtG4+feyZBiGbfBmU5dYl3Ebe9re88B\nbX0EWOBgMNkoVKXpMqQexwxIAreGFT6OlJo6qJJG7E9+fjvyx+1T8pDXM9NWIztd\n5XnOkqOXob0RMKhBC5yi7qPK1ipuRHw92EV/cwUCgYBbcjJCkX7Z7IWlBHRwUHTA\nbiDEkQx42P/LYqOgylheDy5uDT1Mt98ktyjfkiXld3yzYQvrCUhFqeReYlOblYRY\njx8Ry10mGnSeOKXhVqqR7ggTyD9+uRFtj+inW2oz7IsGL1TlxepiGtLGIOb8nFRH\n4pb2C3gpmsdwugA4YxFCcA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@veterinariapandy-73c5d.iam.gserviceaccount.com",
+  "client_id": "108599075728122349842",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40veterinariapandy-73c5d.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

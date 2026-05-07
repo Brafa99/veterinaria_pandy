@@ -178,15 +178,15 @@ Future<void> _logout(BuildContext context) async {
   decoration: BoxDecoration(
     boxShadow: [
       BoxShadow(
-        color: Color(0xFF16161F),
+        color: Color(0xFF0054A6),
         blurRadius: 2,
         offset: Offset(2, 0),
       ),
     ],
-    color: const Color(0xFFF0F2F5),
+    color: const Color(0xFF0054A6),
     border: Border(
       bottom: BorderSide(
-        color: Colors.black.withOpacity(0.08),
+        color: Colors.white70,
         width: 1,
       ),
     ),
@@ -198,7 +198,7 @@ Future<void> _logout(BuildContext context) async {
         if (isMobile)
           Builder(
             builder: (context) => IconButton(
-              icon: const Icon(Icons.menu, color: Colors.black87),
+              icon: const Icon(Icons.menu, color: Colors.white),
               onPressed: () => Scaffold.of(context).openDrawer(),
             ),
           ),
@@ -207,7 +207,7 @@ Future<void> _logout(BuildContext context) async {
     style: TextStyle(
   fontSize: isMobile ? 15 : 20,
   fontWeight: FontWeight.bold,
-  color: Colors.black87,
+  color: Colors.white,
 ),
   ),
         const Spacer(),
@@ -244,7 +244,7 @@ Future<void> _logout(BuildContext context) async {
               CircleAvatar(
                 radius: 16,
                 backgroundColor: Colors.grey.shade300,
-                child: const Icon(Icons.person, size: 18),
+                child: const Icon(Icons.person, size: 18, color:Color(0xFF0054A6)),
               ),
 
               const SizedBox(width: 8),
@@ -255,6 +255,7 @@ Future<void> _logout(BuildContext context) async {
                   user?.email ?? "admin",
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
+                    color: Colors.white
                   ),
                 ),
 
@@ -329,7 +330,7 @@ class HomeDashboard extends StatelessWidget {
       StatCard(
         title: "Productos",
         count: 0,
-        color: Colors.blue,
+        color: Color(0xFF0054A6),
         image: "assets/img/productos.png",
         onTap: () => go(7),
       ),

@@ -189,7 +189,7 @@ class _VentasReportesDayPageState
       children: [
         ElevatedButton.icon(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: Color(0xFF0054A6),
             foregroundColor: Colors.white,
           ),
           onPressed: loadingPdf ? null : _downloadPdf,
@@ -231,7 +231,7 @@ class _VentasReportesDayPageState
   width: double.infinity,
   child: ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Color(0xFF0054A6),
       foregroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 14),
     ),
@@ -422,7 +422,7 @@ dataRowMinHeight: 40,
     DataCell(
       ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFF0054A6),
           foregroundColor: Colors.white,
         ),
         onPressed: () {

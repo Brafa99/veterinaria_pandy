@@ -18,7 +18,7 @@ class ComprobanteViewVentas extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Comprobante Venta"),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Color(0xFF0054A6),
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
@@ -90,7 +90,7 @@ class ComprobanteViewVentas extends StatelessWidget {
                     icon: const Icon(Icons.print),
                     label: const Text("Imprimir"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Color(0xFF0054A6),
                       foregroundColor: Colors.white,
                     ),
                   ),

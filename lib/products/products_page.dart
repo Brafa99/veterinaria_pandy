@@ -332,7 +332,7 @@ Widget _card(Map d) {
                   child: _miniItem(
                     "Stock",
                     "${d["stock"] ?? 0}",
-                    Colors.blueGrey,
+                    Color(0xFF0054A6),
                   ),
                 ),
                 Expanded(

@@ -52,8 +52,6 @@ bool searchCacheReady = false;
 
   final snap = await FirebaseFirestore.instance
       .collection("clientes")
-      .orderBy("nombre")
-      .orderBy("nombre_mascota")
       .limit(50)
       .get();
 
@@ -75,8 +73,7 @@ bool searchCacheReady = false;
 
   final snap = await FirebaseFirestore.instance
       .collection("clientes")
-      .orderBy("nombre")
-      .orderBy("nombre_mascota")
+      .orderBy("id_cliente")
       .startAfterDocument(lastDoc!)
       .limit(50)
       .get();
@@ -119,6 +116,7 @@ void dispose() {
   Future<void> _loadSearchCache() async {
   final snap = await FirebaseFirestore.instance
       .collection("clientes")
+      .orderBy("id_cliente")
       .get();
 
   allClientes = snap.docs.map((e) {
@@ -131,10 +129,10 @@ void dispose() {
       "especie": c["especie"] ?? "",
       "sexo": c["sexo"] ?? "",
       "fechanac": c["fechanac"] ?? "",
-      "nombre_dueno": c["nombre"] ?? "",
+      "nombre": c["nombre"] ?? "",
       "telefono": c["telefono"] ?? "",
       "direccion": c["direccion"] ?? "",
-      "ci": c["dni"] ?? "",
+      "dni": c["dni"] ?? "",
       "nit": c["nit"] ?? "",
       "marca": c["marca_tatuaje"] ?? "",
     };
@@ -145,6 +143,7 @@ void dispose() {
 
 Future<void> search(String value) async {
   if (!searchCacheReady) return;
+  
   if (value.trim().isEmpty) {
     setState(() {
       isSearching = false;
@@ -153,34 +152,29 @@ Future<void> search(String value) async {
     return;
   }
 
-  final q = value.toLowerCase();
+  // 1. Normalizamos la entrada: pasamos a minúsculas y dividimos por espacios
+  // Ejemplo: "Mia Murillo" -> ["mia", "murillo"]
+  final searchTerms = value.toLowerCase().trim().split(RegExp(r'\s+'));
 
   setState(() {
     isSearching = true;
   });
 
   searchResults = allClientes.where((c) {
+    // 2. Creamos un "Super String" que contenga toda la info relevante del cliente
+    // Agregamos espacios entre campos para evitar que el final de uno se pegue con el inicio de otro
+    final combinedData = [
+      (c["id_cliente"] ?? ""),
+      (c["nombre"] ?? ""),
+      (c["nombre_mascota"] ?? ""),
+      (c["telefono"] ?? ""),
+      (c["dni"] ?? ""),
+      (c["nit"] ?? ""),
+    ].join(" ").toLowerCase();
 
-    final nombre =
-        (c["nombre_dueno"] ?? "").toString().toLowerCase();
-
-    final mascota =
-        (c["nombre_mascota"] ?? "").toString().toLowerCase();
-
-    final telefono =
-        (c["telefono"] ?? "").toString().toLowerCase();
-
-    final ci =
-        (c["ci"] ?? "").toString().toLowerCase();
-        
-    final nit =
-        (c["ci"] ?? "").toString().toLowerCase();    
-
-    return nombre.contains(q) ||
-           mascota.contains(q) ||
-           telefono.contains(q) ||
-           nit.contains(q) ||
-           ci.contains(q);
+    // 3. Verificamos que TODOS los términos de búsqueda estén en el combinedData
+    // Esto permite que "mia" esté en nombre_mascota y "murillo" esté en nombre
+    return searchTerms.every((term) => combinedData.contains(term));
 
   }).take(50).toList();
 
@@ -298,11 +292,11 @@ final isMobile = width < 600;
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.blue.withOpacity(0.1),
+                        color: Color(0xFF0054A6).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        "#${i + 1}",
+                        "# "+d["id_cliente"],
                         style: const TextStyle(fontSize: 12),
                       ),
                     )
@@ -312,7 +306,7 @@ final isMobile = width < 600;
                 const SizedBox(height: 10),
 
                 /// ================= INFO =================
-                Text("Dueño: ${d["nombre_dueno"] ?? ""}"),
+                Text("Propietario: ${d["nombre"] ?? ""}"),
                 const SizedBox(height: 4),
                 Text("Tel: ${d["telefono"] ?? ""}"),
 
@@ -438,7 +432,7 @@ final isMobile = width < 600;
                     DataColumn(label: Text("#")),
                     DataColumn(label: Text("Mascota")),
                     DataColumn(label: Text("Raza")),
-                    DataColumn(label: Text("Nombre Dueño")),
+                    DataColumn(label: Text("Propietario")),
                     DataColumn(label: Text("Color")),
                     DataColumn(label: Text("Especie")),
                     DataColumn(label: Text("Sexo")),
@@ -483,7 +477,7 @@ final isMobile = width < 600;
 
                         DataCell(
                           Text(
-                            "${i + 1}",
+                            safe(d["id_cliente"]),
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                             ),
@@ -553,9 +547,9 @@ final isMobile = width < 600;
                               style: ElevatedButton.styleFrom(
 
                                 backgroundColor:
-                                    const Color(0xFFD4B170),
+                                    const Color(0xFF0054A6),
 
-                                foregroundColor: Colors.black,
+                                foregroundColor: Colors.white,
 
                                 elevation: 1,
 
@@ -609,7 +603,7 @@ final isMobile = width < 600;
                   _btnHeader(
                     Icons.download,
                     "Descargar",
-                    Colors.blue,
+                    Color(0xFF0054A6),
                     generatingDownload ? null : _descargarPdf,
                   ),
                   _btnHeader(
@@ -646,7 +640,7 @@ final isMobile = width < 600;
                   _btnHeader(
                     Icons.download,
                     "Descargar",
-                    Colors.blue,
+                    Color(0xFF0054A6),
                     generatingDownload ? null : _descargarPdf,
                   ),
                   _btnHeader(

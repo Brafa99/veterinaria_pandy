@@ -294,7 +294,7 @@ void resetPOS() {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
-                        backgroundColor: Colors.green,
+                        backgroundColor: Color(0xFF0054A6),
                       ),
                       onPressed: finalizarVenta,
                       child: const Text("TERMINAR VENTA", style: TextStyle(color: Colors.white),),

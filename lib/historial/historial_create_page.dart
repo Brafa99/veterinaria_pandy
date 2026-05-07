@@ -44,7 +44,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(value),
-      selectedColor: Colors.green,
+      selectedColor: Color(0xFF0054A6),
       labelStyle: TextStyle(
         color: selected ? Colors.white : Colors.black,
       ),
@@ -140,8 +140,8 @@ if (monto > 0) {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("REGISTRAR HISTORIAL"),
-        backgroundColor: Colors.green,
+        title: const Text("AGREGAR REGISTRO"),
+       
 
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -266,7 +266,7 @@ if (monto > 0) {
                     child: ElevatedButton(
                       onPressed: guardar,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: Color(0xFF0054A6),
                       ),
                       child: Text("Registrar",style: TextStyle(color: Colors.white),
                       ),

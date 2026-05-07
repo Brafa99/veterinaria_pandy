@@ -189,7 +189,7 @@ class _VentasReportesRangePageState
           icon: const Icon(Icons.download),
           label: const Text("Descargar"),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: Color(0xFF0054A6),
             foregroundColor: Colors.white,
           ),
         ),
@@ -287,7 +287,7 @@ class _VentasReportesRangePageState
   width: double.infinity,
   child: ElevatedButton(
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Color(0xFF0054A6),
       foregroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 14),
     ),
@@ -473,7 +473,7 @@ dataRowMinHeight: 40,
     DataCell(
       ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFF0054A6),
           foregroundColor: Colors.white,
         ),
         onPressed: () {

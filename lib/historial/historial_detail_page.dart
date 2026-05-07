@@ -227,7 +227,7 @@ Widget _avatar() {
       color: Colors.blue.shade50,
       borderRadius: BorderRadius.circular(12),
     ),
-    child: const Icon(Icons.pets, color: Colors.blue, size: 30),
+    child: const Icon(Icons.pets, color: Color(0xFF0054A6), size: 30),
   );
 }
 
@@ -267,13 +267,13 @@ Widget _headerResponsive() {
     children: [
       ElevatedButton.icon(
         onPressed: loadingPdf ? null : _descargarPdfCliente,
-        icon: const Icon(Icons.download),
+        icon: const Icon(Icons.download,color: Colors.white,),
         label: const Text("Descargar",style: TextStyle(color: Colors.white),),
         style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
       ),
       ElevatedButton.icon(
         onPressed: loadingPrint ? null : _imprimirPdfCliente,
-        icon: const Icon(Icons.print),
+        icon: const Icon(Icons.print,color: Colors.white,),
         label: const Text("Imprimir", style: TextStyle(color: Colors.white)),
         style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
       ),
@@ -283,13 +283,13 @@ Widget _headerResponsive() {
               Map<String, dynamic>.from(widget.data);
           DashboardController.goTo(10);
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add,color: Colors.white,),
         label: const Text("Registrar", style: TextStyle(color: Colors.white)),
         style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
       ),
       ElevatedButton.icon(
         onPressed: _volver,
-        icon: const Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back,color: Colors.white,),
         label: const Text("Regresar", style: TextStyle(color: Colors.white)),
         style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
       ),
@@ -703,7 +703,7 @@ dataRowMaxHeight: 130,
 
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.redAccent,
+                                    backgroundColor: Color(0xFF0054A6),
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10),

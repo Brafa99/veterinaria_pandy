@@ -402,7 +402,7 @@ Widget build(BuildContext context) {
                         icon: const Icon(Icons.calculate),
                         label: const Text("Calcular"),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.cyan,
+                          backgroundColor: Color(0xFF0054A6),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
@@ -533,7 +533,7 @@ Container(
           dataRowColor: MaterialStateProperty.resolveWith<Color?>(
             (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return Colors.blue.withOpacity(0.1);
+                return Color(0xFF0054A6).withOpacity(0.1);
               }
               return null;
             },
@@ -625,7 +625,7 @@ Widget _btnDownload() {
     icon: const Icon(Icons.download),
     label: const Text("Descargar"),
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.blue,
+      backgroundColor: Color(0xFF0054A6),
       foregroundColor: Colors.white,
     ),
   );
@@ -637,7 +637,7 @@ Widget _btnAddEgreso() {
     icon: const Icon(Icons.add),
     label: const Text("Registrar Egreso"),
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.redAccent,
+      backgroundColor: Color(0xFF0054A6),
       foregroundColor: Colors.white,
     ),
   );

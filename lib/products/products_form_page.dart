@@ -233,7 +233,7 @@ class _ProductoFormPageState extends State<ProductoFormPage> {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    isEdit ? Colors.blue : Colors.green,
+                    isEdit ? Color(0xFF0054A6) : Colors.green,
               ),
               onPressed: loading ? null : guardar,
             ),

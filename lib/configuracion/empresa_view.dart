@@ -110,7 +110,7 @@ class _EmpresaViewState extends State<EmpresaView> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.blue, width: 2),
+          borderSide: const BorderSide(color: Color(0xFF0054A6), width: 2),
         ),
       ),
     );

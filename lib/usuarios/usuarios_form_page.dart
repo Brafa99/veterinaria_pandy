@@ -238,6 +238,8 @@ class _UsuarioFormPageState extends State<UsuarioFormPage> {
 
             _title("Acceso"),
             _field(Icons.account_circle, "Usuario", usuario),
+            _field(Icons.email, "Correo", correo),
+            _field(Icons.phone, "Teléfono", telefono),
 
             if (!isEdit)
               _field(Icons.lock, "Contraseña", password, obscure: true),
@@ -245,8 +247,6 @@ class _UsuarioFormPageState extends State<UsuarioFormPage> {
             const SizedBox(height: 10),
 
             _title("Contacto"),
-            _field(Icons.phone, "Teléfono", telefono),
-            _field(Icons.email, "Correo", correo),
 
             const SizedBox(height: 10),
 
@@ -274,7 +274,7 @@ class _UsuarioFormPageState extends State<UsuarioFormPage> {
               child: ElevatedButton(
                 onPressed: loading ? null : guardar,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isEdit ? Colors.blue : Colors.green,
+                  backgroundColor: Color(0xFF0054A6),
                 ),
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)

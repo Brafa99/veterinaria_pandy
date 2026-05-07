@@ -199,7 +199,7 @@ Widget _header(BuildContext context) {
         )
       : const Icon(Icons.download),
   label: Text("Descargar",style: TextStyle(color: Colors.white),),
-  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+  style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF0054A6)),
 ),
 
       const SizedBox(width: 10),
@@ -295,7 +295,7 @@ Widget _btnDownload() {
           )
         : const Icon(Icons.download),
     label: Text("Descargar",style: TextStyle(color: Colors.white),),
-    style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+    style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF0054A6)),
   );
 }
 
@@ -483,7 +483,7 @@ Widget _btnAdd() {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.edit, color: Colors.blue),
+          icon: const Icon(Icons.edit, color: Color(0xFF0054A6)),
           onPressed: () {
   DashboardController.editingUserId = id;
   DashboardController.goTo(4); // EDITAR
@@ -528,7 +528,7 @@ Widget _btnAdd() {
     Color c = Colors.grey;
 
     if (tipo == "administrador") c = Colors.red;
-    if (tipo == "empleado") c = Colors.blue;
+    if (tipo == "empleado") c = Color(0xFF0054A6);
     if (tipo == "cliente") c = Colors.green;
 
     return Container(

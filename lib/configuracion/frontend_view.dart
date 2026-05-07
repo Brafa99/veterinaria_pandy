@@ -109,7 +109,7 @@ class _FrontendViewState extends State<FrontendView> {
         ),
         focusedBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
-          borderSide: BorderSide(color: Colors.blue, width: 2),
+          borderSide: BorderSide(color: Color(0xFF0054A6), width: 2),
         ),
       ),
     );

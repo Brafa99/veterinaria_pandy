@@ -393,7 +393,7 @@ Future<void> _calcular() async {
             runSpacing: 8,
             children: [
               _btn(Icons.print, "Imprimir", Colors.green, _imprimirPdfReportes),
-              _btn(Icons.download, "Descargar", Colors.blue, _descargarPdfReportes),
+              _btn(Icons.download, "Descargar", Color(0xFF0054A6), _descargarPdfReportes),
               _btn(Icons.add, "Registrar Egreso", Colors.redAccent, _showAddEgreso),
             ],
           )
@@ -411,7 +411,7 @@ Future<void> _calcular() async {
             spacing: 10,
             children: [
               _btn(Icons.print, "Imprimir", Colors.green, _imprimirPdfReportes),
-              _btn(Icons.download, "Descargar", Colors.blue, _descargarPdfReportes),
+              _btn(Icons.download, "Descargar", Color(0xFF0054A6), _descargarPdfReportes),
               _btn(Icons.add, "Registrar Egreso", Colors.redAccent, _showAddEgreso),
             ],
           )
@@ -507,7 +507,7 @@ SizedBox(
     icon: const Icon(Icons.calculate),
     label: const Text("Calcular"),
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.cyan,
+      backgroundColor: Color(0xFF0054A6),
       foregroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(vertical: 14),
     ),
@@ -642,7 +642,7 @@ Container(
           dataRowColor: MaterialStateProperty.resolveWith<Color?>(
             (states) {
               if (states.contains(MaterialState.selected)) {
-                return Colors.blue.withOpacity(0.1);
+                return Color(0xFF0054A6).withOpacity(0.1);
               }
               return null;
             },

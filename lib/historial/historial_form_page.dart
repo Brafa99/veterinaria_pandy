@@ -106,7 +106,7 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(value),
-      selectedColor: Colors.blue,
+      selectedColor: Color(0xFF0054A6),
       labelStyle: TextStyle(
         color: selected ? Colors.white : Colors.black,
       ),
@@ -119,7 +119,7 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("MODIFICAR HISTORIAL"),
-        backgroundColor: Colors.blue,
+        backgroundColor: Color(0xFF0054A6),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => DashboardController.goTo(9),
@@ -219,7 +219,7 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
                     child: ElevatedButton(
                       onPressed: loading ? null : guardar,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Color(0xFF0054A6),
                       ),
                       child: loading
     ? const CircularProgressIndicator(color: Colors.white)

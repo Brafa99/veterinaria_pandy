@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="veterinaria_pandy"
+        android:label="Veterinaria Pandy"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

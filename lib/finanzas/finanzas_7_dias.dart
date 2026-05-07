@@ -331,7 +331,7 @@ final screenWidth = MediaQuery.of(context).size.width;
                     icon: const Icon(Icons.download),
                     label: const Text("Descargar"),
                       style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Color(0xFF0054A6),
                           foregroundColor: Colors.white
                     ),
                   ),
@@ -342,7 +342,7 @@ final screenWidth = MediaQuery.of(context).size.width;
                     icon: const Icon(Icons.add),
                     label: const Text("Registrar Egreso"),
                       style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Color(0xFF0054A6),
                       foregroundColor: Colors.white
                     ),
                   ),
@@ -493,7 +493,7 @@ final screenWidth = MediaQuery.of(context).size.width;
           dataRowColor: MaterialStateProperty.resolveWith<Color?>(
             (Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
-                return Colors.blue.withOpacity(0.1);
+                return Color(0xFF0054A6).withOpacity(0.1);
               }
               return null;
             },

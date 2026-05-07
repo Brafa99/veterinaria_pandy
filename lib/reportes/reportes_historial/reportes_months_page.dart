@@ -177,7 +177,7 @@ class _HistorialReportesMonthPageState
                           _btnHeader(
                             Icons.download,
                             "Descargar",
-                            Colors.blue,
+                            Color(0xFF0054A6),
                             loadingPdf ? null : _downloadPdf,
                           ),
                           _btnHeader(
@@ -219,7 +219,7 @@ class _HistorialReportesMonthPageState
                           _btnHeader(
                             Icons.download,
                             "Descargar",
-                            Colors.blue,
+                            Color(0xFF0054A6),
                             loadingPdf ? null : _downloadPdf,
                           ),
                           _btnHeader(
@@ -274,7 +274,7 @@ class _HistorialReportesMonthPageState
               Center(
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
+                      backgroundColor: Color(0xFF0054A6),
                       foregroundColor: Colors.white,
                     ),
                   onPressed: _loadMonth,
@@ -534,7 +534,7 @@ dataRowMinHeight: 40,
                         DataCell(
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
+                              backgroundColor: Color(0xFF0054A6),
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () {

@@ -249,7 +249,7 @@ void _volver() {
               child: ElevatedButton(
                 onPressed: loading ? null : guardar,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Color(0xFF0054A6),
                 ),
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)

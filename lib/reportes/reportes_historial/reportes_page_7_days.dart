@@ -157,7 +157,7 @@ class _HistorialReportesLast7DaysPageState
                           _btnHeader(
                             Icons.download,
                             "Descargar",
-                            Colors.blue,
+                            Color(0xFF0054A6),
                             loadingPdf ? null : _descargarPdfReportes,
                           ),
                           _btnHeader(
@@ -190,7 +190,7 @@ class _HistorialReportesLast7DaysPageState
                           _btnHeader(
                             Icons.download,
                             "Descargar",
-                            Colors.blue,
+                            Color(0xFF0054A6),
                             loadingPdf ? null : _descargarPdfReportes,
                           ),
                           _btnHeader(
@@ -394,7 +394,7 @@ Widget _btnHeader(
                         DataCell(
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
+                              backgroundColor: Color(0xFF0054A6),
                               foregroundColor: Colors.white,
                             ),
                             onPressed: () {

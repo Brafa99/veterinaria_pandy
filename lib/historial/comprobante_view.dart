@@ -21,7 +21,7 @@ class ComprobanteView extends StatelessWidget {
       appBar: AppBar(
         
         title: const Text("Comprobante"),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Color(0xFF0054A6),
       ),
       body: FutureBuilder<DocumentSnapshot>(
   future: FirebaseFirestore.instance
@@ -132,10 +132,10 @@ Widget _buildComprobante(BuildContext context, Map<String, dynamic> data) {
 
                 ElevatedButton.icon(
                   onPressed: () => _printPdf(data),
-                  icon: const Icon(Icons.print),
+                  icon: const Icon(Icons.print, color: Colors.white,),
                   label: const Text("Imprimir",style: TextStyle(color: Colors.white)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Color(0xFF0054A6),
                   ),
                 ),
 
@@ -143,7 +143,7 @@ Widget _buildComprobante(BuildContext context, Map<String, dynamic> data) {
 
                 ElevatedButton.icon(
                   onPressed: () => _downloadPdf(data),
-                  icon: const Icon(Icons.download),
+                  icon: const Icon(Icons.download, color: Colors.white),
                   label: const Text("Descargar", style: TextStyle(color: Colors.white),),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -202,7 +202,7 @@ Container(
       // HEADER
       Row(
         children: const [
-          Icon(Icons.person, size: 20, color: Colors.redAccent),
+          Icon(Icons.person, size: 20, color: Color(0xFF0054A6)),
           SizedBox(width: 6),
           Text(
             "Información del Cliente",

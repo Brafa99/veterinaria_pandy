@@ -152,9 +152,10 @@ Future<void> loadSearchCache() async {
   _debounce?.cancel();
 
   _debounce = Timer(const Duration(milliseconds: 350), () async {
-    final q = normalize(value);
+    // 1. Limpiamos y normalizamos la entrada del usuario
+    final input = value.trim().toLowerCase();
 
-    if (q.isEmpty) {
+    if (input.isEmpty) {
       setState(() {
         isSearching = false;
         searchResults = [];
@@ -168,18 +169,23 @@ Future<void> loadSearchCache() async {
       isSearching = true;
     });
 
-    final filtered = allClientes.where((c) {
-      final nombre = (c["nombre"] ?? "").toString().toLowerCase();
-      final mascota = (c["nombre_mascota"] ?? "").toString().toLowerCase();
-      final telefono = (c["telefono"] ?? "").toString().toLowerCase();
-      final ci = (c["ci"] ?? "").toString().toLowerCase();
-      final nit = (c["nit"] ?? "").toString().toLowerCase();
+    // 2. Dividimos la búsqueda en términos individuales (ej: ["mia", "murillo"])
+    final searchTerms = input.split(RegExp(r'\s+'));
 
-      return nombre.contains(q) ||
-          mascota.contains(q) ||
-          telefono.contains(q) ||
-          ci.contains(q) ||
-          nit.contains(q);
+    final filtered = allClientes.where((c) {
+      // 3. Creamos el bloque de texto donde buscaremos
+      // Usamos los campos del mapa 'c' asegurándonos de que coincidan con tu caché
+      final combinedData = [
+        (c["nombre"] ?? ""),
+        (c["nombre_mascota"] ?? ""),
+        (c["telefono"] ?? ""),
+        (c["dni"] ?? c["ci"] ?? ""), // Soporta ambos nombres de campo por si acaso
+        (c["nit"] ?? ""),
+      ].join(" ").toLowerCase();
+
+      // 4. Lógica Multi-término: ¿Están todas las palabras escritas en alguna parte del registro?
+      return searchTerms.every((term) => combinedData.contains(term));
+      
     }).take(200).toList();
 
     setState(() {
@@ -187,7 +193,6 @@ Future<void> loadSearchCache() async {
     });
   });
 }
-
 String normalize(String text) {
   return text
       .toLowerCase()
@@ -279,7 +284,7 @@ final list = currentData;
             )
           : const Icon(Icons.download),
       label: Text("Descargar",style: TextStyle(color: Colors.white)),
-      style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+      style: ElevatedButton.styleFrom(backgroundColor: Color(0xFF0054A6)),
     ),
 
     ElevatedButton.icon(
@@ -435,7 +440,7 @@ final list = currentData;
                       DataColumn(label: Text("Color")),
                       DataColumn(label: Text("Especie")),
                       DataColumn(label: Text("Sexo")),
-                      DataColumn(label: Text("Dueño")),
+                      DataColumn(label: Text("Propietario")),
                       DataColumn(label: Text("Teléfono")),
                       DataColumn(label: Text("Dirección")),
                       DataColumn(label: Text("CI")),
@@ -511,7 +516,7 @@ final list = currentData;
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.edit, color: Colors.blue),
+          icon: const Icon(Icons.edit, color: Color(0xFF0054A6)),
           onPressed: () {
             DashboardController.editingClienteId = id;
             DashboardController.goTo(6);

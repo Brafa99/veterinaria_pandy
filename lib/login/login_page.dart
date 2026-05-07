@@ -125,7 +125,7 @@ switch (e.code) {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(Icons.pets,
-                      size: 50, color: Color(0xFFE91E63)),
+                      size: 50, color: Color(0xFF0054A6)),
 
                   const SizedBox(height: 10),
 
@@ -167,7 +167,7 @@ switch (e.code) {
                             rememberMe = v ?? false;
                           });
                         },
-                        activeColor: const Color(0xFFE91E63),
+                        activeColor: const Color(0xFF0054A6),
                       ),
                       const Text(
                         "Recordar sesión",
@@ -183,7 +183,7 @@ switch (e.code) {
                     child: ElevatedButton(
                       onPressed: loading ? null : login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE91E63),
+                        backgroundColor: const Color(0xFF0054A6),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       child: loading
@@ -216,7 +216,7 @@ switch (e.code) {
       borderRadius: BorderRadius.circular(10),
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: const BorderSide(color: Color(0xFFE91E63)),
+      borderSide: const BorderSide(color: Color(0xFF0054A6)),
       borderRadius: BorderRadius.circular(10),
     ),
   );

@@ -33,22 +33,35 @@ class _SplashGateState extends State<SplashGate> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              "assets/img/pandy.jpeg",
-              width: 150,
+Widget build(BuildContext context) {
+  final size = MediaQuery.of(context).size;
+
+  return Scaffold(
+    backgroundColor: const Color(0xFFF4F6FA),
+    body: SizedBox.expand(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(30),
+              child: Center(
+                child: Image.asset(
+                  "assets/img/pandy.jpeg",
+                  width: size.width * 0.85,
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-            const CircularProgressIndicator(),
-          ],
-        ),
+          ),
+
+          const Padding(
+            padding: EdgeInsets.only(bottom: 30),
+            child: CircularProgressIndicator(),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

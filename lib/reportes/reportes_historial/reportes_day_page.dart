@@ -183,7 +183,7 @@ class _HistorialReportesDayPageState extends State<HistorialReportesDayPage> {
           icon: const Icon(Icons.download),
           label: const Text("Descargar"),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: Color(0xFF0054A6),
             foregroundColor: Colors.white,
           ),
         ),
@@ -228,7 +228,7 @@ class _HistorialReportesDayPageState extends State<HistorialReportesDayPage> {
                       : DateFormat("dd/MM/yyyy").format(selectedDay!),
                 ),
                 style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Color(0xFF0054A6),
         foregroundColor: Colors.white,
       ),
               ),
@@ -377,7 +377,7 @@ dataRowMinHeight: 40,
                           DataCell(
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
+                              backgroundColor: Color(0xFF0054A6),
                               foregroundColor: Colors.white,
                             ),
                               onPressed: () {

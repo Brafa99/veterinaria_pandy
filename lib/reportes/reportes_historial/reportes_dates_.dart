@@ -175,7 +175,7 @@ class _HistorialReportesRangePageState
           icon: const Icon(Icons.download),
           label: const Text("Descargar"),
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
+            backgroundColor: Color(0xFF0054A6),
             foregroundColor: Colors.white,
           ),
         ),
@@ -271,7 +271,7 @@ Center(
 
   ElevatedButton(
     style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Color(0xFF0054A6),
         foregroundColor: Colors.white,
       ),
                 onPressed: _loadRange,
@@ -400,7 +400,7 @@ Center(
                           DataCell(
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
+                              backgroundColor: Color(0xFF0054A6),
                               foregroundColor: Colors.white,
                             ),
                               onPressed: () {

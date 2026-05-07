@@ -169,7 +169,7 @@ class _VentasReportesMonthPageState
                   icon: const Icon(Icons.download),
                   label: const Text("Descargar", style: TextStyle(color: Colors.white),),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Color(0xFF0054A6),
                     minimumSize: Size(isMobile ? 140 : 160, 45),
                   ),
                 ),
@@ -428,7 +428,7 @@ final isMobile = MediaQuery.of(context).size.width < 600;
     DataCell(
       ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFF0054A6),
           foregroundColor: Colors.white,
         ),
         onPressed: () {
