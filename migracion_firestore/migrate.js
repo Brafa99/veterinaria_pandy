@@ -1,4 +1,102 @@
 const admin = require('firebase-admin');
+const serviceAccount = require("./veterinariapandy-73c5d-firebase-adminsdk.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+// Pégalos como los tengas, con corchetes por fuera: [ [...], (...) ]
+const sqlData = [
+    // AQUÍ PEGA TUS LÍNEAS
+    // Si tienen ( ) o [ ], este script intentará procesarlos
+    [`25792`,`P 3.350 kg...`,`2026-04-25`,`Consulta Medica`,`5523`,`5`,`230`,``],
+    [`25793`,`.`,`2026-04-25`,``,`12`,`5`,`0`,``],
+    // ... el resto de tus datos ...
+];
+
+async function ejecutarMigracion() {
+    console.log("🚀 Iniciando carga en historial_v2...");
+
+    for (let i = 0; i < sqlData.length; i++) {
+        const registro = sqlData[i];
+        
+        // Verificación de seguridad: si la línea está vacía o mal formada, la salta
+        if (!registro || registro.length < 5) {
+            console.log(`⚠️ Saltando línea ${i + 1} por formato incorrecto`);
+            continue;
+        }
+
+        // Convertimos el registro a un array real por si acaso vienen como objetos de JS
+        const r = Array.from(registro);
+        const id_h = r[0];
+        const descripcion = r[1];
+        const fecha = r[2];
+        const tipo = r[3];
+        const id_c = r[4];
+        const precio = r[6];
+
+        try {
+            // Buscamos datos del cliente (ID_CLIENTE debe ser String para comparar)
+            const clienteRef = await db.collection('clientes')
+                .where('id_cliente', '==', id_c.toString())
+                .get();
+            
+            let c = {};
+            if (!clienteRef.empty) {
+                c = clienteRef.docs[0].data();
+            }
+
+            let fechaDate = new Date();
+            if (fecha && fecha !== "0000-00-00") {
+                const parts = fecha.split('-');
+                fechaDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+
+            const nuevoHistorial = {
+                ci: c.ci || "",
+                color: c.color || "N/A",
+                correo: c.correo || "",
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                descripcion: corregirTexto(descripcion),
+                direccion: c.direccion || "",
+                especie: c.especie || "",
+                fecha_registro: admin.firestore.Timestamp.fromDate(fechaDate),
+                fechanac: c.fechanac || "",
+                id_cliente: id_c.toString(),
+                nombre_dueno: c.nombre_dueno || c.nombre || "Sin nombre",
+                nombre_mascota: c.nombre_mascota || "Desconocido",
+                precioh: parseInt(precio) || 0,
+                raza: c.raza || "",
+                sexo: c.sexo || "",
+                telefono: c.telefono || "",
+                tipo_historial: tipo || "Consulta Medica"
+            };
+
+            await db.collection('historial_v2').doc(id_h.toString()).set(nuevoHistorial);
+            console.log(`✅ ID ${id_h} migrado (${nuevoHistorial.nombre_mascota})`);
+
+        } catch (err) {
+            console.error(`❌ Error procesando registro en posición ${i}:`, err.message);
+        }
+    }
+    console.log("🏁 Proceso finalizado.");
+}
+
+function corregirTexto(texto) {
+    if (!texto) return "";
+    try {
+        return Buffer.from(texto, 'latin1').toString('utf8');
+    } catch (e) { return texto; }
+}
+
+ejecutarMigracion();
+
+
+
+
+const admin = require('firebase-admin');
 const serviceAccount = require(`./pandy_firestore.json`);
 
 admin.initializeApp({

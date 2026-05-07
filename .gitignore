@@ -46,3 +46,4 @@ app.*.map.json
 
 serviceAccountKey.json
 migracion_firestore/serviceAccountKey.json
+migracion_firestore/pandy_firestore.json
