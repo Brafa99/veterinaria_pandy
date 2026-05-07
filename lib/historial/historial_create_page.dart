@@ -18,6 +18,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
   bool loading = false;
 
   String tipoServicio = "";
+  
   String tipoPago = "";
 
   String previewId = ""; // 🔥 ID visual
@@ -212,6 +213,12 @@ if (monto > 0) {
                       optionChip(
                         label: "Peluquería",
                         value: "Peluqueria",
+                        group: tipoServicio,
+                        onSelected: (v) => setState(() => tipoServicio = v),
+                      ),
+                      optionChip(
+                        label: "Otros",
+                        value: "otro",
                         group: tipoServicio,
                         onSelected: (v) => setState(() => tipoServicio = v),
                       ),
