@@ -95,7 +95,7 @@ Future<void> loadSearchCache() async {
       "nombre_mascota": d["nombre_mascota"] ?? "",
       "nombre": d["nombre"] ?? "",
       "telefono": d["telefono"] ?? "",
-      "ci": d["ci"] ?? "",
+      "dni": d["ci"] ?? "",
       "nit": d["nit"] ?? "",
       "raza": d["raza"] ?? "",
       "color": d["color"] ?? "",
