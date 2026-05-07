@@ -235,14 +235,14 @@ class _HistorialReportesDayPageState extends State<HistorialReportesDayPage> {
 
           const SizedBox(height: 20),
 
-          TextField(
-            decoration: const InputDecoration(
-              hintText: "Buscar cliente/mascota",
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (v) => setState(() => search = v),
-          ),
+          // TextField(
+          //   decoration: const InputDecoration(
+          //     hintText: "Buscar cliente/mascota",
+          //     prefixIcon: Icon(Icons.search),
+          //     border: OutlineInputBorder(),
+          //   ),
+          //   onChanged: (v) => setState(() => search = v),
+          // ),
         ],
       ),
     );

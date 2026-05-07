@@ -433,6 +433,7 @@ Widget build(BuildContext context) {
 
                       // ================= CARDS =================
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _card("Ingresos", ingresos, Colors.green),
               _card("Egresos", egresos, Colors.red),
@@ -660,7 +661,7 @@ Widget _btnAddEgreso() {
         ),
         const SizedBox(height: 10),
         Text(
-          "Bs ${value.toStringAsFixed(2)}",
+          "Bs ${value}",
           style: TextStyle(
             color: color,
             fontSize: 18,

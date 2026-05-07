@@ -145,7 +145,7 @@ class _UsuarioFormPageState extends State<UsuarioFormPage> {
     );
 
     DashboardController.editingUserId = null;
-    DashboardController.goTo(2);
+    DashboardController.goTo(1);
 
   } on FirebaseAuthException catch (e) {
     String msg = "Error al crear usuario";

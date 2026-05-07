@@ -27,6 +27,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
   final ci = TextEditingController();
   final correo = TextEditingController();
   final marcaTatuaje = TextEditingController();
+  final nit = TextEditingController();
 
   bool isEdit = false;
 
@@ -45,6 +46,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     raza.dispose();
     color.dispose();
     especie.dispose();
+    nit.dispose();
     sexo.dispose();
     marcaTatuaje.dispose();
     nombreDueno.dispose();
@@ -70,11 +72,11 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     color.text = d["color"] ?? "";
     especie.text = d["especie"] ?? "";
     sexo.text = d["sexo"] ?? "";
-
     nombreDueno.text = d["nombre"] ?? "";
     telefono.text = d["telefono"] ?? "";
     direccion.text = d["direccion"] ?? "";
-    ci.text = d["ci"] ?? "";
+    ci.text = d["ci"] ?? d["dni"] ?? "";
+    nit.text = d["nit"] ?? "";
     correo.text = d["correo"] ?? "";
 
     marcaTatuaje.text =
@@ -100,6 +102,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     add(nombreDueno.text);
     add(telefono.text);
     add(ci.text);
+    add(nit.text);
     add(direccion.text);
     add(marcaTatuaje.text);
 
@@ -125,7 +128,9 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
       "nombre": nombreDueno.text,
       "telefono": telefono.text,
       "direccion": direccion.text,
+      
       if (ci.text.trim().isNotEmpty) "ci": ci.text.trim(),
+      if (nit.text.trim().isNotEmpty) "nit": nit.text.trim(),
       if (correo.text.trim().isNotEmpty) "correo": correo.text.trim(),
 
       "searchIndex": _searchIndex(),
@@ -233,6 +238,7 @@ void _volver() {
             _field(telefono, "Teléfono"),
             _field(direccion, "Dirección"),
             _field(ci, "CI (Opcional)", required: false),
+            _field(nit, "NIT (Opcional)", required: false),
             _field(marcaTatuaje, "Marca / Tatuaje", required: false),
 
             const SizedBox(height: 25),

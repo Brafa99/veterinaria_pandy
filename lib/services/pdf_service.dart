@@ -673,6 +673,7 @@ Future<Uint8List> buildHistorialPdf(List<Map<String, dynamic>> data) async {
                 "Teléfono",
                 "Dirección",
                 "CI",
+                "NIT",
                 "Marca",
               ]),
 
@@ -691,6 +692,7 @@ Future<Uint8List> buildHistorialPdf(List<Map<String, dynamic>> data) async {
                   fixText(d["telefono"]),
                   fixText(d["direccion"]),
                   fixText(d["ci"]),
+                  fixText(d["nit"]),
                   fixText(
                     (d["marca"] == null ||
                             d["marca"].toString().trim().isEmpty)
@@ -726,6 +728,12 @@ Future<Uint8List> buildHistorialClientePdf(
 
   if (data.isEmpty) return pdf.save();
   final cliente = data.first;
+  final nitCi =
+    (cliente["nit"] ?? "").toString().trim().isNotEmpty
+        ? cliente["nit"].toString()
+        : ((cliente["ci"] ?? "").toString().trim().isNotEmpty
+            ? cliente["ci"].toString()
+            : "-");
 
   pdf.addPage(
     pw.MultiPage(
@@ -767,6 +775,7 @@ Future<Uint8List> buildHistorialClientePdf(
                   "Dueño: ${fixText(cliente["nombre_dueno"])}"),
               pw.Text("Tel: ${fixText(cliente["telefono"])}"),
               pw.Text("Dir: ${fixText(cliente["direccion"])}"),
+              pw.Text("NIT / CI: $nitCi"),
             ],
           ),
         ),
@@ -823,4 +832,3 @@ Future<Uint8List> buildHistorialClientePdf(
 
   return pdf.save();
 }
-

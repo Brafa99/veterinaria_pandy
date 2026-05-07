@@ -172,9 +172,17 @@ Future<void> _logout(BuildContext context) async {
   final user = FirebaseAuth.instance.currentUser;
 
   return Container(
+    
   height: 65,
   padding: const EdgeInsets.symmetric(horizontal: 20),
   decoration: BoxDecoration(
+    boxShadow: [
+      BoxShadow(
+        color: Color(0xFF16161F),
+        blurRadius: 2,
+        offset: Offset(2, 0),
+      ),
+    ],
     color: const Color(0xFFF0F2F5),
     border: Border(
       bottom: BorderSide(
@@ -183,6 +191,8 @@ Future<void> _logout(BuildContext context) async {
       ),
     ),
   ),
+
+  
     child: Row(
       children: [
         if (isMobile)

@@ -74,6 +74,8 @@ void dispose() {
       "raza": d["raza"] ?? ctx["raza"],
     };
   }).toList();
+
+
 }
 
 Future<void> _descargarPdfCliente() async {
@@ -133,7 +135,6 @@ Future<void> _imprimirPdfCliente() async {
 
 Widget _infoPaciente(Map<String, dynamic> d) {
   final isMobile = MediaQuery.of(context).size.width < 700;
-
   return Card(
     elevation: 2,
     margin: const EdgeInsets.symmetric(vertical: 4),
@@ -174,7 +175,7 @@ Widget _infoPaciente(Map<String, dynamic> d) {
                             overflow: TextOverflow.ellipsis,
                           ),
                           Text(
-                            "Dueño: ${d["nombre_dueno"] ?? ""}",
+                            "Dueño: ${d["nombre"]}",
                             style: const TextStyle(fontSize: 12),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -240,7 +241,7 @@ Widget _infoText(Map d) {
       ),
       const SizedBox(height: 5),
       Text(
-        "${d["raza"] ?? "-"}  •  Dueño: ${d["nombre_dueno"] ?? "-"}",
+        "${d["raza"] ?? "-"}  •  Dueño: ${d["nombre"] ?? "-"}",
         style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
       ),
       const SizedBox(height: 8),
@@ -325,9 +326,10 @@ Widget _headerResponsive() {
   @override
 Widget build(BuildContext context) {
   final Map<String, dynamic> d =
-      Map<String, dynamic>.from(widget.data as Map);
+      Map<String, dynamic>.from(widget.data);
 
   final idCliente = (d["id_cliente"] ?? "").toString();
+
   final isMobile = MediaQuery.of(context).size.width < 700;
 
   return Scaffold(
@@ -535,11 +537,19 @@ Widget build(BuildContext context) {
                   }
 
                   /// ================= WEB =================
-                  return LayoutBuilder(
+                  return ScrollConfiguration(
+  behavior: const MaterialScrollBehavior().copyWith(
+    dragDevices: {
+      PointerDeviceKind.mouse,
+      PointerDeviceKind.touch,
+      PointerDeviceKind.trackpad,
+    },
+  ),
+  child: LayoutBuilder(
   builder: (context, constraints) {
     return Material(
       child: Container(
-        color: const Color(0xFF1E1E2E), // fondo base consistente
+        color: const Color(0xFFF5F6FA), // fondo base consistente
         child: Scrollbar(
           controller: _verticalController,
           thumbVisibility: true,
@@ -553,28 +563,53 @@ Widget build(BuildContext context) {
               child: SingleChildScrollView(
                 controller: _horizontalController,
                 scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minWidth: constraints.maxWidth,
-                  ),
-                  child: DataTable(
+                child: Container(
+  constraints: const BoxConstraints(
+    minWidth: 1000,
+  ),
+                  child: 
+                  Container(
+  margin: const EdgeInsets.all(10),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(14),
+    border: Border.all(
+      color: Colors.grey.shade300,
+      width: 1,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.04),
+        blurRadius: 8,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  ),
+  child: DataTable(
+    border: TableBorder.all(
+  color: Colors.grey.shade300,
+  width: 1,
+  borderRadius: BorderRadius.circular(12),
+),
                     columnSpacing: 20,
                     horizontalMargin: 12,
-                    dividerThickness: 0.6,
+                    dividerThickness: 1,
+                    dataRowMinHeight: 60,
+dataRowMaxHeight: 130,
 
                     headingRowColor: MaterialStateProperty.all(
-                      const Color(0xFF2A2A3D),
-                    ),
+  const Color(0xFFF1F3F6),
+),
 
-                    dataRowColor: MaterialStateProperty.resolveWith(
-                      (states) => const Color(0xFF1E1E2E),
-                    ),
+                    dataRowColor: MaterialStateProperty.resolveWith((states) {
+  return Colors.white;
+}),
 
                     headingTextStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-
+  color: Colors.black87,
+  fontWeight: FontWeight.bold,
+  fontSize: 13.5,
+),
                     columns: const [
                       DataColumn(label: Text("Descripción")),
                       DataColumn(label: Text("Fecha")),
@@ -600,7 +635,7 @@ Widget build(BuildContext context) {
                         return Text(
                           text,
                           style: const TextStyle(
-                            color: Colors.white70,
+                            color: Colors.black87,
                             fontSize: 13,
                           ),
                           maxLines: 2,
@@ -610,6 +645,14 @@ Widget build(BuildContext context) {
                       }
 
                       return DataRow(
+                        color: MaterialStateProperty.resolveWith<Color?>(
+    (states) {
+      if (docs.indexOf(doc).isEven) {
+        return Colors.grey.shade50;
+      }
+      return Colors.white;
+    },
+  ),
                         cells: [
 
                           /// DESCRIPCIÓN
@@ -641,7 +684,7 @@ Widget build(BuildContext context) {
 
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black87,
+                                    backgroundColor: Colors.grey.shade800,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10),
@@ -678,7 +721,7 @@ Widget build(BuildContext context) {
 
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blueAccent,
+                                    backgroundColor: const Color(0xFFD4B170),
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10),
@@ -694,7 +737,7 @@ Widget build(BuildContext context) {
                                       ),
                                     );
                                   },
-                                  child: const Text("Ver"),
+                                  child: const Text("Ver Comprobante"),
                                 ),
                               ],
                             ),
@@ -709,9 +752,9 @@ Widget build(BuildContext context) {
           ),
         ),
       ),
-    );
+    ));
   },
-);
+));
                 },
               ),
             ),
@@ -723,18 +766,18 @@ Widget build(BuildContext context) {
 }
 
 Widget descriptionCell(String text) {
-  return ConstrainedBox(
-    constraints: const BoxConstraints(
-      maxWidth: 250, // 👈 controla el ancho máximo de la columna
-    ),
+  return SizedBox(
+    width: 260, // ancho fijo real
     child: Text(
       text,
+      softWrap: true,
+      maxLines: 6, // 🔥 permite crecer verticalmente
+      overflow: TextOverflow.ellipsis,
       style: const TextStyle(
-        color: Colors.white70,
+        color: Colors.black87,
         fontSize: 13,
+        height: 1.4, // 🔥 más legible
       ),
-      softWrap: true,        // 👈 permite salto de línea
-      overflow: TextOverflow.visible, // 👈 no corta horizontalmente
     ),
   );
 }

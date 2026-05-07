@@ -60,7 +60,7 @@ if (isMobile) {
     boxShadow: [
       BoxShadow(
         color: Color(0xFF16161F),
-        blurRadius: 2.5,
+        blurRadius: 2,
         offset: Offset(2, 0),
       ),
     ],

@@ -19,7 +19,7 @@ class ClientesPage extends StatefulWidget {
 }
 
 class _ClientesPageState extends State<ClientesPage> {
-  final int limit = 30;
+  final int limit = 35;
 
   List<DocumentSnapshot> docs = [];
 
@@ -32,20 +32,39 @@ class _ClientesPageState extends State<ClientesPage> {
   bool generatingPrint = false;
   final scrollController = ScrollController();
   Timer? _debounce;
+  List<Map<String, dynamic>> searchResults = [];
+List<Map<String, dynamic>> allClientes = [];
+bool searchCacheReady = false;
+bool searchReady = false;
+
+List<Map<String, dynamic>> get _docsMapped =>
+    docs.map((e) {
+      final d = e.data() as Map<String, dynamic>;
+      return {
+        ...d,
+        "id": e.id,
+      };
+    }).toList();
+
+List<Map<String, dynamic>> get currentData =>
+    isSearching ? searchResults : _docsMapped;
+    
 
   @override
-  void initState() {
-    super.initState();
-    fetchInitial();
+void initState() {
+  super.initState();
 
-    scrollController.addListener(() {
-      if (!isSearching &&
-          scrollController.position.pixels >=
-              scrollController.position.maxScrollExtent - 200) {
-        fetchMore();
-      }
-    });
-  }
+  loadSearchCache();
+fetchInitial();
+
+  scrollController.addListener(() {
+    if (!isSearching &&
+        scrollController.position.pixels >=
+            scrollController.position.maxScrollExtent - 200) {
+      fetchMore();
+    }
+  });
+}
 
   @override
 void dispose() {
@@ -54,21 +73,57 @@ void dispose() {
   super.dispose();
 }
 
+void onSearchChanged(String value) {
+  _debounce?.cancel();
+
+  _debounce = Timer(const Duration(milliseconds: 400), () {
+    search(value);
+  });
+}
+
+
+Future<void> loadSearchCache() async {
+  final snap = await FirebaseFirestore.instance
+      .collection("clientes")
+      .get();
+
+  allClientes = snap.docs.map((e) {
+    final d = e.data();
+
+    return {
+      "id": e.id,
+      "nombre_mascota": d["nombre_mascota"] ?? "",
+      "nombre": d["nombre"] ?? "",
+      "telefono": d["telefono"] ?? "",
+      "ci": d["ci"] ?? "",
+      "nit": d["nit"] ?? "",
+      "raza": d["raza"] ?? "",
+      "color": d["color"] ?? "",
+      "especie": d["especie"] ?? "",
+      "sexo": d["sexo"] ?? "",
+      "direccion": d["direccion"] ?? "",
+    };
+  }).toList();
+
+  searchReady = true;
+  setState(() {});
+}
+
   // ================= NORMAL LIST =================
   Future<void> fetchInitial() async {
-    setState(() => loading = true);
+  setState(() => loading = true);
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection("clientes")
-        .orderBy(FieldPath.documentId)
-        .limit(limit)
-        .get();
+  final snapshot = await FirebaseFirestore.instance
+      .collection("clientes")
+      .orderBy(FieldPath.documentId)
+      .limit(limit)
+      .get();
 
-    docs = snapshot.docs;
-    hasMore = docs.length == limit;
+  docs = snapshot.docs;
+  hasMore = docs.length == limit;
 
-    setState(() => loading = false);
-  }
+  setState(() => loading = false);
+}
 
   Future<void> fetchMore() async {
     if (!hasMore || loading || isSearching) return;
@@ -93,62 +148,43 @@ void dispose() {
     setState(() => loading = false);
   }
 
-  void search(String value) {
+  Future<void> search(String value) async {
   _debounce?.cancel();
 
-  _debounce = Timer(const Duration(milliseconds: 400), () async {
-    final text = value.toLowerCase().trim();
+  _debounce = Timer(const Duration(milliseconds: 350), () async {
+    final q = normalize(value);
 
-    if (text.isEmpty) {
+    if (q.isEmpty) {
       setState(() {
         isSearching = false;
+        searchResults = [];
       });
-      fetchInitial();
       return;
     }
 
+    if (!searchReady) return;
+
     setState(() {
-      loading = true;
       isSearching = true;
     });
 
-    try {
-      List<DocumentSnapshot> baseDocs;
+    final filtered = allClientes.where((c) {
+      final nombre = (c["nombre"] ?? "").toString().toLowerCase();
+      final mascota = (c["nombre_mascota"] ?? "").toString().toLowerCase();
+      final telefono = (c["telefono"] ?? "").toString().toLowerCase();
+      final ci = (c["ci"] ?? "").toString().toLowerCase();
+      final nit = (c["nit"] ?? "").toString().toLowerCase();
 
-      // 🔥 CLAVE: si texto corto → NO usar Firestore
-      if (text.length < 4) {
-        baseDocs = docs; // usa lo ya cargado
-      } else {
-        final first = text.split(" ").first;
+      return nombre.contains(q) ||
+          mascota.contains(q) ||
+          telefono.contains(q) ||
+          ci.contains(q) ||
+          nit.contains(q);
+    }).take(200).toList();
 
-        final snapshot = await FirebaseFirestore.instance
-            .collection("clientes")
-            .where("searchIndex", arrayContains: first)
-            .limit(200)
-            .get();
-
-        baseDocs = snapshot.docs;
-      }
-
-      final words = text.split(" ");
-
-      final filtered = baseDocs.where((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        final index = List<String>.from(data["searchIndex"] ?? []);
-
-        return words.every((w) =>
-            index.any((item) => item.contains(w)));
-      }).toList();
-
-      setState(() {
-        docs = filtered;
-        loading = false;
-      });
-
-    } catch (e) {
-      print("ERROR SEARCH: $e");
-      setState(() => loading = false);
-    }
+    setState(() {
+      searchResults = filtered;
+    });
   });
 }
 
@@ -161,20 +197,21 @@ String normalize(String text) {
       .replaceAll("é", "e")
       .replaceAll("í", "i")
       .replaceAll("ó", "o")
-      .replaceAll("ú", "u");
+      .replaceAll("ú", "u")
+      .replaceAll("ñ", "n");
 }
 
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 800;
-
+final list = currentData;
     return SelectionArea(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             TextField(
-              onChanged: search,
+              onChanged: onSearchChanged,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Icons.search),
                 hintText: "Buscar cliente...",
@@ -192,13 +229,13 @@ String normalize(String text) {
               child: loading && docs.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : isMobile
+                  
                       ? ListView.builder(
                           controller: scrollController,
-                          itemCount: docs.length,
+                          itemCount: list.length,
                           itemBuilder: (_, i) {
-                            final d =
-                                docs[i].data() as Map<String, dynamic>;
-                            return _card(context, docs[i].id, d);
+                            final d = list[i];
+                            return _card(context, d["id"] ?? "", d);
                           },
                         )
                       : _table(context),
@@ -357,7 +394,7 @@ String normalize(String text) {
 }
   
  Widget _table(BuildContext context) {
-  final visible = docs.take(300).toList();
+  final visible = currentData;
 
   return ScrollConfiguration(
     behavior: ScrollConfiguration.of(context).copyWith(
@@ -408,7 +445,7 @@ String normalize(String text) {
                     ],
 
                     rows: List.generate(visible.length, (i) {
-                      final d = visible[i].data() as Map<String, dynamic>;
+                      final d = visible[i];
 
                       return DataRow(
                         cells: [
@@ -428,7 +465,7 @@ String normalize(String text) {
       ? "No tiene"
       : d["marca_tatuaje"],
 )),
-                          DataCell(_actions(context, docs[i].id)),
+                          DataCell(_actions(context, visible[i]["id"] ?? "")),
                         ],
                       );
                     }),

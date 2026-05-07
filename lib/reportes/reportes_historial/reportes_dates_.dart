@@ -279,14 +279,14 @@ Center(
               ),
           const SizedBox(height: 10),
 
-          TextField(
-            decoration: const InputDecoration(
-              hintText: "Buscar cliente/mascota",
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-            ),
-            onChanged: (v) => setState(() => search = v),
-          ),
+          // TextField(
+          //   decoration: const InputDecoration(
+          //     hintText: "Buscar cliente/mascota",
+          //     prefixIcon: Icon(Icons.search),
+          //     border: OutlineInputBorder(),
+          //   ),
+          //   onChanged: (v) => setState(() => search = v),
+          // ),
         ],
       ),
     );

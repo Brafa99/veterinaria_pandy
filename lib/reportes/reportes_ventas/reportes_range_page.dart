@@ -298,19 +298,19 @@ class _VentasReportesRangePageState
 
           const SizedBox(height: 10),
 
-          TextField(
-  decoration: InputDecoration(
-    hintText: "Buscar...",
-    prefixIcon: const Icon(Icons.search),
-    isDense: true,
-    filled: true,
-    fillColor: Colors.grey.shade100,
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
-  onChanged: (v) => setState(() => search = v),
-)
+//           TextField(
+//   decoration: InputDecoration(
+//     hintText: "Buscar...",
+//     prefixIcon: const Icon(Icons.search),
+//     isDense: true,
+//     filled: true,
+//     fillColor: Colors.grey.shade100,
+//     border: OutlineInputBorder(
+//       borderRadius: BorderRadius.circular(12),
+//     ),
+//   ),
+//   onChanged: (v) => setState(() => search = v),
+// )
         ],
       ),
     );

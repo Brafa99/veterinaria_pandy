@@ -198,26 +198,26 @@ class _VentasReportesMonthPageState
 
         const SizedBox(height: 10),
 
-        _searchInput(),
+        //_searchInput(),
       ],
     ),
   );
 }
 
-Widget _searchInput() {
-  return TextField(
-    decoration: InputDecoration(
-      hintText: "Buscar cliente / mascota / producto",
-      prefixIcon: const Icon(Icons.search),
-      filled: true,
-      fillColor: Colors.grey.shade100,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-    ),
-    onChanged: (v) => setState(() => search = v),
-  );
-}
+// Widget _searchInput() {
+//   return TextField(
+//     decoration: InputDecoration(
+//       hintText: "Buscar cliente / mascota / producto",
+//       prefixIcon: const Icon(Icons.search),
+//       filled: true,
+//       fillColor: Colors.grey.shade100,
+//       border: OutlineInputBorder(
+//         borderRadius: BorderRadius.circular(12),
+//       ),
+//     ),
+//     onChanged: (v) => setState(() => search = v),
+//   );
+// }
 
 Widget _filters() {
   final isMobile = MediaQuery.of(context).size.width < 600;

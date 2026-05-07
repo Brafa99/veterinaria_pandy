@@ -740,7 +740,7 @@ Container(
         Text(title, style: const TextStyle(color: Colors.white70)),
         const SizedBox(height: 10),
         Text(
-          "Bs ${value.toStringAsFixed(2)}",
+          "Bs ${value}",
           style: TextStyle(
             color: color,
             fontSize: 18,

@@ -32,8 +32,10 @@ class _HistorialPageState extends State<HistorialPage> {
   bool hasMore = true;
   bool loadingMore = false;
 List searchResults = [];
+List<Map<String, dynamic>> allClientes = [];
 
 bool isSearching = false;
+bool searchCacheReady = false;
   
 
   String safe(dynamic v) =>
@@ -93,8 +95,11 @@ bool isSearching = false;
   @override
   void initState() {
     super.initState();
-    
     _load();
+    Future.microtask(() async {
+    await _loadSearchCache();
+  });
+  
     _verticalController.addListener(() {
   if (_verticalController.position.pixels >=
       _verticalController.position.maxScrollExtent - 200) {
@@ -103,31 +108,21 @@ bool isSearching = false;
 });
   }
 
-Future<void> search(String value) async {
-  if (value.isEmpty) {
-    setState(() {
-      isSearching = false;
-    });
-    _load(); // vuelve al modo paginado
-    return;
-  }
+  @override
+void dispose() {
+  _debounce?.cancel();
+  _verticalController.dispose();
+  _horizontalController.dispose();
+  super.dispose();
+}
 
-  setState(() {
-    loading = true;
-    isSearching = true;
-  });
-
+  Future<void> _loadSearchCache() async {
   final snap = await FirebaseFirestore.instance
       .collection("clientes")
-      .orderBy("nombre")
-      .startAt([value])
-      .endAt([value + '\uf8ff'])
-      .limit(50)
       .get();
 
-  searchResults = snap.docs.map((doc) {
-    final c = doc.data();
-
+  allClientes = snap.docs.map((e) {
+    final c = e.data();
     return {
       "id_cliente": c["id_cliente"] ?? "",
       "nombre_mascota": c["nombre_mascota"] ?? "",
@@ -140,13 +135,56 @@ Future<void> search(String value) async {
       "telefono": c["telefono"] ?? "",
       "direccion": c["direccion"] ?? "",
       "ci": c["dni"] ?? "",
+      "nit": c["nit"] ?? "",
       "marca": c["marca_tatuaje"] ?? "",
     };
   }).toList();
+      searchCacheReady = true;
+
+}
+
+Future<void> search(String value) async {
+  if (!searchCacheReady) return;
+  if (value.trim().isEmpty) {
+    setState(() {
+      isSearching = false;
+      searchResults.clear();
+    });
+    return;
+  }
+
+  final q = value.toLowerCase();
 
   setState(() {
-    loading = false;
+    isSearching = true;
   });
+
+  searchResults = allClientes.where((c) {
+
+    final nombre =
+        (c["nombre_dueno"] ?? "").toString().toLowerCase();
+
+    final mascota =
+        (c["nombre_mascota"] ?? "").toString().toLowerCase();
+
+    final telefono =
+        (c["telefono"] ?? "").toString().toLowerCase();
+
+    final ci =
+        (c["ci"] ?? "").toString().toLowerCase();
+        
+    final nit =
+        (c["ci"] ?? "").toString().toLowerCase();    
+
+    return nombre.contains(q) ||
+           mascota.contains(q) ||
+           telefono.contains(q) ||
+           nit.contains(q) ||
+           ci.contains(q);
+
+  }).take(50).toList();
+
+  setState(() {});
 }
 
   // ================= PDF =================
@@ -183,6 +221,9 @@ void onSearchChanged(String value) {
   DashboardController.editingClienteId = null; // 🔥 importante
   DashboardController.goTo(5);
 }
+
+List get currentData =>
+    isSearching ? searchResults : historial;
 
   // ================= UI =================
   @override
@@ -222,10 +263,10 @@ final isMobile = width < 600;
   Widget _mobileList() {
   return ListView.builder(
     controller: _verticalController,
-    itemCount: historial.length,
+    itemCount: currentData.length,
     padding: const EdgeInsets.symmetric(vertical: 10),
     itemBuilder: (_, i) {
-      final d = historial[i];
+      final d = currentData[i];
 
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // 🔥 más separación
@@ -312,109 +353,229 @@ final isMobile = width < 600;
 }
 
   Widget _table() {
-    
-  return ScrollConfiguration(
-    behavior: const MaterialScrollBehavior().copyWith(
-      dragDevices: {
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.touch,
-        PointerDeviceKind.trackpad,
-      },
+
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.05),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ],
     ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        controller: _verticalController,
-        scrollDirection: Axis.vertical,
+
+    child: ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+
+      child: ScrollConfiguration(
+        behavior: const MaterialScrollBehavior().copyWith(
+          dragDevices: {
+            PointerDeviceKind.mouse,
+            PointerDeviceKind.touch,
+            PointerDeviceKind.trackpad,
+          },
+        ),
+
         child: Scrollbar(
-          controller: _horizontalController,
           thumbVisibility: true,
-          notificationPredicate: (n) => n.metrics.axis == Axis.horizontal,
+
           child: SingleChildScrollView(
-            controller: _horizontalController,
-            scrollDirection: Axis.horizontal,
-            physics: const ClampingScrollPhysics(),
-            child: DataTable(
-              border: TableBorder.all(
-                color: Colors.grey.shade700,
-                width: 1.5,
-              ),
+            controller: _verticalController,
+            scrollDirection: Axis.vertical,
 
-              headingRowColor: MaterialStateProperty.all(
-                Colors.grey.shade200,
-              ),
+            child: Scrollbar(
+              controller: _horizontalController,
+              thumbVisibility: true,
+              notificationPredicate: (n) =>
+                  n.metrics.axis == Axis.horizontal,
 
-              headingTextStyle: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
+              child: SingleChildScrollView(
+                controller: _horizontalController,
+                scrollDirection: Axis.horizontal,
+                physics: const ClampingScrollPhysics(),
 
-              dataRowMinHeight: 55,
-              dataRowMaxHeight: 110,
+                child: DataTable(
 
-              columnSpacing: 20,
-              horizontalMargin: 10,
+                  /// ================= ESTILO =================
 
-              columns: const [
-                DataColumn(label: Text("#")),
-                DataColumn(label: Text("Mascota")),
-                DataColumn(label: Text("Raza")),
-                DataColumn(label: Text("Color")),
-                DataColumn(label: Text("Especie")),
-                DataColumn(label: Text("Sexo")),
-                DataColumn(label: Text("Nacimiento")),
-                DataColumn(label: Text("Nombre Dueño")),
-                DataColumn(label: Text("Teléfono")),
-                DataColumn(label: Text("Dirección")),
-                DataColumn(label: Text("Marca/Tatuaje")),
-                DataColumn(label: Text("Acción")),
-              ],
-              
+                  border: TableBorder.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
 
+                  headingRowColor:
+                      MaterialStateProperty.all(
+                    const Color(0xFFF5F5F5),
+                  ),
 
-              rows: List.generate(historial.length, (i) {
-                final d = historial[i];
+                  headingTextStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                    color: Colors.black87,
+                  ),
 
-                Widget cell(String v) {
-                  return SizedBox(
-                    width: 100,
-                    child: Text(
-                      v,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  );
-                }
+                  dataTextStyle: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.black87,
+                  ),
 
-                return DataRow(
-                  cells: [
-                    DataCell(Text("${i + 1}")),
-DataCell(cell(safe(d["nombre_mascota"]))),
-DataCell(cell(safe(d["raza"]))),
-DataCell(cell(safe(d["color"]))),
-DataCell(cell(safe(d["especie"]))),
-DataCell(cell(safe(d["sexo"]))),
-DataCell(cell(safe(d["fechanac"]))),
-DataCell(cell(safe(d["nombre_dueno"]))), // 🔥 ya corregido
-DataCell(cell(safe(d["telefono"]))),
-DataCell(cell(safe(d["direccion"]))),
-DataCell(cell(safe(d["marca"]))), // 🔥 ya corregido
-                    DataCell(
-                      SizedBox(
-                        width: 120,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            //limpiarHistorialBasura();
-                            DashboardController.selectedHistorial = d;
-                            DashboardController.goTo(9);
-                          },
-                          child: const Text("Ver Historial", style: TextStyle(fontSize: 12.5),),
-                        ),
-                      ),
-                    ),
+                  dataRowMinHeight: 58,
+                  dataRowMaxHeight: 70,
+
+                  columnSpacing: 22,
+                  horizontalMargin: 14,
+
+                  dividerThickness: 0.6,
+
+                  /// ================= COLUMNAS =================
+
+                  columns: const [
+
+                    DataColumn(label: Text("#")),
+                    DataColumn(label: Text("Mascota")),
+                    DataColumn(label: Text("Raza")),
+                    DataColumn(label: Text("Nombre Dueño")),
+                    DataColumn(label: Text("Color")),
+                    DataColumn(label: Text("Especie")),
+                    DataColumn(label: Text("Sexo")),
+                    DataColumn(label: Text("Nacimiento")),
+                    DataColumn(label: Text("Teléfono")),
+                    DataColumn(label: Text("Dirección")),
+                    DataColumn(label: Text("NIT")),
+                    DataColumn(label: Text("Marca/Tatuaje")),
+                    DataColumn(label: Text("Acción")),
+
                   ],
-                );
-              }),
+
+                  /// ================= FILAS =================
+
+                  rows: List.generate(currentData.length, (i) {
+
+                    final d = currentData[i];
+
+                    Widget cell(String v, {double w = 120}) {
+                      return SizedBox(
+                        width: w,
+                        child: Text(
+                          v,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }
+
+                    return DataRow(
+
+                      color: MaterialStateProperty.resolveWith<Color?>(
+                        (states) {
+                          if (i.isEven) {
+                            return Colors.grey.shade50;
+                          }
+                          return Colors.white;
+                        },
+                      ),
+
+                      cells: [
+
+                        DataCell(
+                          Text(
+                            "${i + 1}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+
+                        DataCell(cell(
+                          safe(d["nombre_mascota"]),
+                          w: 130,
+                        )),
+
+                        DataCell(cell(safe(d["raza"]))),
+
+                        DataCell(cell(
+                          safe(d["nombre"]),
+                          w: 180,
+                        )),
+
+                        DataCell(cell(safe(d["color"]))),
+
+                        DataCell(cell(safe(d["especie"]))),
+
+                        DataCell(cell(safe(d["sexo"]))),
+
+                        DataCell(cell(safe(d["fechanac"]))),
+
+                        DataCell(cell(safe(d["telefono"]))),
+
+                        DataCell(cell(
+                          safe(d["direccion"]),
+                          w: 180,
+                        )),
+
+                        DataCell(cell(safe(d["nit"]))),
+
+                        DataCell(cell(
+                          safe(d["marca"]),
+                          w: 140,
+                        )),
+
+                        /// ================= BOTÓN =================
+
+                        DataCell(
+
+                          SizedBox(
+                            width: 140,
+
+                            child: ElevatedButton.icon(
+
+                              onPressed: () {
+
+                                DashboardController.selectedHistorial = d;
+                                DashboardController.goTo(9);
+
+                              },
+
+                              icon: const Icon(
+                                Icons.visibility,
+                                size: 17,
+                              ),
+
+                              label: const Text(
+                                "Ver Historial",
+                                style: TextStyle(fontSize: 12.5),
+                              ),
+
+                              style: ElevatedButton.styleFrom(
+
+                                backgroundColor:
+                                    const Color(0xFFD4B170),
+
+                                foregroundColor: Colors.black,
+
+                                elevation: 1,
+
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+                ),
+              ),
             ),
           ),
         ),
@@ -569,7 +730,7 @@ Future<List<Map<String, dynamic>>> getAllHistorial() async {
       "nombre_dueno": c["nombre"] ?? "", // 🔥 clave
       "telefono": c["telefono"] ?? "",
       "direccion": c["direccion"] ?? "",
-      "ci": c["dni"] ?? "",
+      "ci": c["ci"] ?? c["dni"] ?? "",
       "marca": c["marca_tatuaje"] ?? "",
     };
   }).toList();

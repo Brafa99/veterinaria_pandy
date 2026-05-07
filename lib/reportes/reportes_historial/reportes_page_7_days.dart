@@ -207,14 +207,14 @@ class _HistorialReportesLast7DaysPageState
             const SizedBox(height: 10),
 
             /// BUSCADOR (SIEMPRE FULL WIDTH)
-            TextField(
-              decoration: const InputDecoration(
-                hintText: "Buscar cliente / mascota",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (v) => setState(() => search = v),
-            ),
+            // TextField(
+            //   decoration: const InputDecoration(
+            //     hintText: "Buscar cliente / mascota",
+            //     prefixIcon: Icon(Icons.search),
+            //     border: OutlineInputBorder(),
+            //   ),
+            //   onChanged: (v) => setState(() => search = v),
+            // ),
           ],
         ),
       );

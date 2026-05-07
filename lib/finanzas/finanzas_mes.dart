@@ -408,42 +408,38 @@ Widget build(BuildContext context) {
                         ),
                       ),
     
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 5),
     
                       // ================= PIE =================
                       SizedBox(
-                        height: isMobile ? 180 : 240,
-                        child: PieChart(
-                          PieChartData(
-                            centerSpaceRadius: 30,
-                            sectionsSpace: 2,
-                            sections: ((ingresos + egresos) == 0)
-                                ? [
-                                    PieChartSectionData(
-                                      value: 1,
-                                      title: "Sin datos",
-                                      color: Colors.grey,
-                                    )
-                                  ]
-                                : [
-                                    PieChartSectionData(
-                                      value: ingresos,
-                                      title: "Ingresos",
-                                      color: Colors.green,
-                                      titleStyle:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    PieChartSectionData(
-                                      value: egresos,
-                                      title: "Egresos",
-                                      color: Colors.red,
-                                      titleStyle:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                  ],
-                          ),
-                        ),
-                      ),
+            height: 220,
+            child: PieChart(
+              PieChartData(
+                sections: ((ingresos + egresos) == 0)
+    ? [
+        PieChartSectionData(
+          value: 1,
+          title: "Sin datos",
+          color: Colors.grey,
+        )
+      ]
+    :
+                
+                 [
+                  PieChartSectionData(
+                    titleStyle: TextStyle(color: Colors.black),
+                      value: ingresos,
+                      title: "Ingresos",
+                      color: Colors.green),
+                  PieChartSectionData(
+                    titleStyle: TextStyle(color: Colors.black),
+                      value: egresos,
+                      title: "Egresos",
+                      color: Colors.red),
+                ],
+              ),
+            ),
+          ),
     
                       const SizedBox(height: 25),
                       // ================= TABLE (PRO STYLE) =================
@@ -659,7 +655,7 @@ Widget _btnAddEgreso() {
         Text(title, style: const TextStyle(color: Colors.white70)),
         const SizedBox(height: 10),
         Text(
-          "Bs ${value.toStringAsFixed(2)}",
+          "Bs ${value}",
           style: TextStyle(
             color: color,
             fontSize: 18,

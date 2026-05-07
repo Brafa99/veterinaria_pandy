@@ -195,16 +195,16 @@ class _VentasReportesLast7DaysPageState
         const SizedBox(height: 10),
 
         // 🔥 BUSCADOR FULL WIDTH
-        TextField(
-          decoration: InputDecoration(
-            hintText: "Buscar cliente / mascota / producto",
-            prefixIcon: const Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          onChanged: (v) => setState(() => search = v),
-        ),
+        // TextField(
+        //   decoration: InputDecoration(
+        //     hintText: "Buscar cliente / mascota / producto",
+        //     prefixIcon: const Icon(Icons.search),
+        //     border: OutlineInputBorder(
+        //       borderRadius: BorderRadius.circular(12),
+        //     ),
+        //   ),
+        //   onChanged: (v) => setState(() => search = v),
+        // ),
       ],
     ),
   );

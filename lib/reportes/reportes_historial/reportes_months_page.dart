@@ -210,12 +210,12 @@ class _HistorialReportesMonthPageState
                       Wrap(
                         spacing: 10,
                         children: [
-                          _btnHeader(
-                            Icons.search,
-                            "Buscar",
-                            Colors.redAccent,
-                            _loadMonth,
-                          ),
+                          // _btnHeader(
+                          //   Icons.search,
+                          //   "Buscar",
+                          //   Colors.redAccent,
+                          //   _loadMonth,
+                          // ),
                           _btnHeader(
                             Icons.download,
                             "Descargar",
@@ -286,14 +286,14 @@ class _HistorialReportesMonthPageState
 
 
             /// ================= SEARCH =================
-            TextField(
-              decoration: const InputDecoration(
-                hintText: "Buscar cliente/mascota",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (v) => setState(() => search = v),
-            ),
+            // TextField(
+            //   decoration: const InputDecoration(
+            //     hintText: "Buscar cliente/mascota",
+            //     prefixIcon: Icon(Icons.search),
+            //     border: OutlineInputBorder(),
+            //   ),
+            //   onChanged: (v) => setState(() => search = v),
+            // ),
           ],
         ),
       );

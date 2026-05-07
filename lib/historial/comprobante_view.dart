@@ -68,7 +68,7 @@ class ComprobanteView extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       SizedBox(
-        width: 90,
+        width: 100,
         child: Text(
           "$label:",
           style: const TextStyle(
@@ -97,6 +97,13 @@ Widget _buildComprobante(BuildContext context, Map<String, dynamic> data) {
 
   
   final precio = (data['precioh'] ?? 0).toString();
+
+  final nitCi =
+    (data['nit'] ?? '').toString().trim().isNotEmpty
+        ? data['nit'].toString()
+        : ((data['ci'] ?? '').toString().trim().isNotEmpty
+            ? data['ci'].toString()
+            : '-');
 
   return Center(
   child: ConstrainedBox(
@@ -214,13 +221,15 @@ Container(
 
       const SizedBox(height: 6),
 
-      // TELÉFONO
-      _infoRow("Teléfono", data['telefono'] ?? '-'),
+     _infoRow("Teléfono", data['telefono'] ?? '-'),
 
-      const SizedBox(height: 6),
+const SizedBox(height: 6),
 
-      // MASCOTA
-      _infoRow("Mascota", data['nombre_mascota'] ?? '-'),
+_infoRow("NIT / CI", nitCi),
+
+const SizedBox(height: 6),
+
+_infoRow("Mascota", data['nombre_mascota'] ?? '-'),
     ],
   ),
 ),
@@ -450,6 +459,13 @@ Container(
   final fechaStr =
       fecha != null ? DateFormat('dd/MM/yyyy').format(fecha) : "-";
 
+      final nitCi =
+    (data['nit'] ?? '').toString().trim().isNotEmpty
+        ? data['nit'].toString()
+        : ((data['ci'] ?? '').toString().trim().isNotEmpty
+            ? data['ci'].toString()
+            : '-');
+
   // ================= PRECIO =================
   double precio = 0;
 
@@ -509,6 +525,7 @@ Container(
                   pw.Text("Cliente: ${data['nombre_dueno'] ?? '-'}"),
                   pw.Text("Mascota: ${data['nombre_mascota'] ?? '-'}"),
                   pw.Text("Teléfono: ${data['telefono'] ?? '-'}"),
+                  pw.Text("NIT / CI: $nitCi"),
                 ],
               ),
             ),
