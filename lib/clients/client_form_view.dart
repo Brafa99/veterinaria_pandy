@@ -238,8 +238,8 @@ void _volver() {
 
             const SizedBox(height: 10),
 
-            _section("Datos del dueño"),
-            _field(nombreDueno, "Nombre Dueño"),
+            _section("Datos del Propietario"),
+            _field(nombreDueno, "Nombre Propietario"),
             _field(telefono, "Teléfono"),
             _field(direccion, "Dirección"),
             _field(ci, "CI (Opcional)", required: false),
