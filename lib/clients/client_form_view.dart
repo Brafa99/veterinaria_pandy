@@ -20,6 +20,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
   final color = TextEditingController();
   final especie = TextEditingController();
   final sexo = TextEditingController();
+  final fecha_nac = TextEditingController();
 
   final nombreDueno = TextEditingController();
   final telefono = TextEditingController();
@@ -47,6 +48,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     color.dispose();
     especie.dispose();
     nit.dispose();
+    fecha_nac.dispose();
     sexo.dispose();
     marcaTatuaje.dispose();
     nombreDueno.dispose();
@@ -72,6 +74,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     color.text = d["color"] ?? "";
     especie.text = d["especie"] ?? "";
     sexo.text = d["sexo"] ?? "";
+    fecha_nac.text = d["fechanac"] ?? "";
     nombreDueno.text = d["nombre"] ?? "";
     telefono.text = d["telefono"] ?? "";
     direccion.text = d["direccion"] ?? "";
@@ -99,6 +102,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     add(color.text);
     add(especie.text);
     add(sexo.text);
+    add(fecha_nac.text);
     add(nombreDueno.text);
     add(telefono.text);
     add(ci.text);
@@ -120,7 +124,7 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
       "color": color.text,
       "especie": especie.text,
       "sexo": sexo.text,
-
+      "fechanac": fecha_nac.text,
       "marca_tatuaje": marcaTatuaje.text == "No tiene"
           ? ""
           : marcaTatuaje.text,
@@ -230,6 +234,7 @@ void _volver() {
             _field(color, "Color"),
             _field(especie, "Especie"),
             _field(sexo, "Sexo"),
+            _field(sexo, "Fecha estimada Nacimiento"),
 
             const SizedBox(height: 10),
 

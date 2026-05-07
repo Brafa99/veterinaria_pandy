@@ -143,7 +143,7 @@ void dispose() {
 
 Future<void> search(String value) async {
   if (!searchCacheReady) return;
-  
+
   if (value.trim().isEmpty) {
     setState(() {
       isSearching = false;
@@ -152,17 +152,15 @@ Future<void> search(String value) async {
     return;
   }
 
-  // 1. Normalizamos la entrada: pasamos a minúsculas y dividimos por espacios
-  // Ejemplo: "Mia Murillo" -> ["mia", "murillo"]
-  final searchTerms = value.toLowerCase().trim().split(RegExp(r'\s+'));
+  final searchTerms =
+      value.toLowerCase().trim().split(RegExp(r'\s+'));
 
   setState(() {
     isSearching = true;
   });
 
   searchResults = allClientes.where((c) {
-    // 2. Creamos un "Super String" que contenga toda la info relevante del cliente
-    // Agregamos espacios entre campos para evitar que el final de uno se pegue con el inicio de otro
+
     final combinedData = [
       (c["id_cliente"] ?? ""),
       (c["nombre"] ?? ""),
@@ -172,11 +170,26 @@ Future<void> search(String value) async {
       (c["nit"] ?? ""),
     ].join(" ").toLowerCase();
 
-    // 3. Verificamos que TODOS los términos de búsqueda estén en el combinedData
-    // Esto permite que "mia" esté en nombre_mascota y "murillo" esté en nombre
-    return searchTerms.every((term) => combinedData.contains(term));
+    return searchTerms.every(
+      (term) => combinedData.contains(term),
+    );
 
-  }).take(50).toList();
+  }).toList();
+
+  /// 🔥 ORDEN CORRELATIVO
+  searchResults.sort((a, b) {
+
+    final idA =
+        int.tryParse(a["id_cliente"].toString()) ?? 0;
+
+    final idB =
+        int.tryParse(b["id_cliente"].toString()) ?? 0;
+
+    return idA.compareTo(idB);
+  });
+
+  /// 🔥 LIMITAR RESULTADOS
+  searchResults = searchResults.take(50).toList();
 
   setState(() {});
 }
@@ -475,14 +488,7 @@ final isMobile = width < 600;
 
                       cells: [
 
-                        DataCell(
-                          Text(
-                            safe(d["id_cliente"]),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
+                        DataCell(Text("${i + 1}")),
 
                         DataCell(cell(
                           safe(d["nombre_mascota"]),
