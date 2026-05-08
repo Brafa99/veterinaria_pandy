@@ -240,7 +240,8 @@ List get currentData =>
 
 final isMobile = width < 600;
 
-    return Padding(
+    return SelectionArea(
+  child: Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
@@ -265,7 +266,7 @@ final isMobile = width < 600;
 ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _mobileList() {
