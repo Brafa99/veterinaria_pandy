@@ -537,224 +537,304 @@ Widget build(BuildContext context) {
                   }
 
                   /// ================= WEB =================
-                  return ScrollConfiguration(
-  behavior: const MaterialScrollBehavior().copyWith(
-    dragDevices: {
-      PointerDeviceKind.mouse,
-      PointerDeviceKind.touch,
-      PointerDeviceKind.trackpad,
-    },
-  ),
-  child: LayoutBuilder(
-  builder: (context, constraints) {
-    return Material(
-      child: Container(
-        color: const Color(0xFFF5F6FA), // fondo base consistente
-        child: Scrollbar(
-          controller: _verticalController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            controller: _verticalController,
-            child: Scrollbar(
-              controller: _horizontalController,
-              thumbVisibility: true,
-              notificationPredicate: (n) =>
-                  n.metrics.axis == Axis.horizontal,
-              child: SingleChildScrollView(
-                controller: _horizontalController,
-                scrollDirection: Axis.horizontal,
-                child: Container(
-  constraints: const BoxConstraints(
-    minWidth: 1000,
-  ),
-                  child: 
-                  Container(
-  margin: const EdgeInsets.all(10),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(14),
-    border: Border.all(
-      color: Colors.grey.shade300,
-      width: 1,
+                  /// ================= WEB =================
+return SelectionArea(
+  child: ScrollConfiguration(
+    behavior: const MaterialScrollBehavior().copyWith(
+      dragDevices: {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.mouse,
+      },
     ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.04),
-        blurRadius: 8,
-        offset: const Offset(0, 3),
-      ),
-    ],
-  ),
-  child: DataTable(
-    border: TableBorder.all(
-  color: Colors.grey.shade300,
-  width: 1,
-  borderRadius: BorderRadius.circular(12),
-),
-                    columnSpacing: 20,
-                    horizontalMargin: 12,
-                    dividerThickness: 1,
-                    dataRowMinHeight: 60,
-dataRowMaxHeight: 130,
 
-                    headingRowColor: MaterialStateProperty.all(
-  const Color(0xFFF1F3F6),
-),
+    child: Scrollbar(
+      controller: _verticalController,
+      thumbVisibility: true,
+      interactive: true,
 
-                    dataRowColor: MaterialStateProperty.resolveWith((states) {
-  return Colors.white;
-}),
+      child: Scrollbar(
+        controller: _horizontalController,
+        thumbVisibility: true,
+        interactive: true,
+        notificationPredicate: (notification) {
+          return notification.metrics.axis == Axis.horizontal;
+        },
 
-                    headingTextStyle: const TextStyle(
-  color: Colors.black87,
-  fontWeight: FontWeight.bold,
-  fontSize: 13.5,
-),
-                    columns: const [
-                      DataColumn(label: Text("Descripción")),
-                      DataColumn(label: Text("Fecha")),
-                      DataColumn(label: Text("Servicio")),
-                      DataColumn(label: Text("Precio")),
-                      DataColumn(label: Text("Pago")),
-                      DataColumn(label: Text("Acciones")),
-                    ],
+        child: SingleChildScrollView(
+          controller: _horizontalController,
+          scrollDirection: Axis.horizontal,
 
-                    rows: docs.map((doc) {
-                      final h = Map<String, dynamic>.from(doc.data() as Map);
+          child: SizedBox(
+            width: 1400,
 
-                      final fecha = h["fecha_registro"];
-                      String fechaText = "-";
+            child: SingleChildScrollView(
+              controller: _verticalController,
+              scrollDirection: Axis.vertical,
 
-                      if (fecha is Timestamp) {
-                        final d = fecha.toDate();
-                        fechaText =
-                            "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
-                      }
+              child: Container(
+                margin: const EdgeInsets.all(10),
 
-                      Text cellText(String text) {
-                        return Text(
-                          text,
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 13,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+
+                child: DataTable(
+                  border: TableBorder.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+
+                  columnSpacing: 20,
+                  horizontalMargin: 12,
+                  dividerThickness: 1,
+
+                  dataRowMinHeight: 60,
+                  dataRowMaxHeight: 130,
+
+                  headingRowColor:
+                      MaterialStateProperty.all(
+                    const Color(0xFFF1F3F6),
+                  ),
+
+                  dataRowColor:
+                      MaterialStateProperty.resolveWith(
+                    (states) => Colors.white,
+                  ),
+
+                  headingTextStyle:
+                      const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.5,
+                  ),
+
+                  columns: const [
+                    DataColumn(label: Text("Descripción")),
+                    DataColumn(label: Text("Fecha")),
+                    DataColumn(label: Text("Servicio")),
+                    DataColumn(label: Text("Precio")),
+                    DataColumn(label: Text("Pago")),
+                    DataColumn(label: Text("Acciones")),
+                  ],
+
+                  rows: docs.map((doc) {
+
+                    final h =
+                        Map<String, dynamic>.from(
+                      doc.data() as Map,
+                    );
+
+                    final fecha =
+                        h["fecha_registro"];
+
+                    String fechaText = "-";
+
+                    if (fecha is Timestamp) {
+                      final d = fecha.toDate();
+
+                      fechaText =
+                          "${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
+                    }
+
+                    Text cellText(String text) {
+                      return Text(
+                        text,
+                        style: const TextStyle(
+                          color: Colors.black87,
+                          fontSize: 13,
+                        ),
+                        maxLines: 2,
+                        overflow:
+                            TextOverflow.ellipsis,
+                      );
+                    }
+
+                    return DataRow(
+                      color:
+                          MaterialStateProperty
+                              .resolveWith<Color?>(
+                        (states) {
+
+                          if (docs
+                              .indexOf(doc)
+                              .isEven) {
+                            return Colors
+                                .grey.shade50;
+                          }
+
+                          return Colors.white;
+                        },
+                      ),
+
+                      cells: [
+
+                        /// DESCRIPCIÓN
+                        DataCell(
+                          descriptionCell(
+                            h["descripcion"] ?? "",
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,
-                        );
-                      }
+                        ),
 
-                      return DataRow(
-                        color: MaterialStateProperty.resolveWith<Color?>(
-    (states) {
-      if (docs.indexOf(doc).isEven) {
-        return Colors.grey.shade50;
-      }
-      return Colors.white;
-    },
-  ),
-                        cells: [
+                        /// FECHA
+                        DataCell(
+                          cellText(fechaText),
+                        ),
 
-                          /// DESCRIPCIÓN
-                          DataCell(
-  descriptionCell(h["descripcion"] ?? ""),
-),
-
-                          /// FECHA
-                          DataCell(cellText(fechaText)),
-
-                          /// SERVICIO
-                          DataCell(cellText(
+                        /// SERVICIO
+                        DataCell(
+                          cellText(
                             h["tipo_servicio"] ??
                                 h["tipo_historial"] ??
                                 "",
-                          )),
-
-                          /// PRECIO
-                          DataCell(cellText("Bs ${h["precioh"] ?? 0}")),
-
-                          /// PAGO
-                          DataCell(cellText(h["tipo_pago"] ?? "")),
-
-                          /// ACCIONES
-                          DataCell(
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey.shade800,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    textStyle: const TextStyle(fontSize: 12),
-                                  ),
-                                  onPressed: () async {
-                                    await FirebaseFirestore.instance
-                                        .collection("historial_v2")
-                                        .doc(doc.id)
-                                        .delete();
-                                  },
-                                  child: const Text("Eliminar"),
-                                ),
-
-                                const SizedBox(width: 6),
-
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color(0xFF0054A6),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    textStyle: const TextStyle(fontSize: 12),
-                                  ),
-                                  onPressed: () {
-                                    DashboardController.editingHistorialId =
-                                        doc.id;
-                                    DashboardController.goTo(11);
-                                  },
-                                  child: const Text("Editar"),
-                                ),
-
-                                const SizedBox(width: 6),
-
-                                ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFD4B170),
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10),
-                                    textStyle: const TextStyle(fontSize: 12),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => ComprobanteView(
-                                          idHistorial: doc.id,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text("Ver Comprobante"),
-                                ),
-                              ],
-                            ),
                           ),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                        ),
+
+                        /// PRECIO
+                        DataCell(
+                          cellText(
+                            "Bs ${h["precioh"] ?? 0}",
+                          ),
+                        ),
+
+                        /// PAGO
+                        DataCell(
+                          cellText(
+                            h["tipo_pago"] ?? "",
+                          ),
+                        ),
+
+                        /// ACCIONES
+                        DataCell(
+                          Row(
+                            mainAxisSize:
+                                MainAxisSize.min,
+
+                            children: [
+
+                              ElevatedButton(
+                                style:
+                                    ElevatedButton
+                                        .styleFrom(
+                                  backgroundColor:
+                                      Colors
+                                          .grey
+                                          .shade800,
+                                  foregroundColor:
+                                      Colors.white,
+                                ),
+
+                                onPressed:
+                                    () async {
+
+                                  await FirebaseFirestore
+                                      .instance
+                                      .collection(
+                                          "historial_v2")
+                                      .doc(doc.id)
+                                      .delete();
+                                },
+
+                                child:
+                                    const Text(
+                                  "Eliminar",
+                                ),
+                              ),
+
+                              const SizedBox(
+                                  width: 6),
+
+                              ElevatedButton(
+                                style:
+                                    ElevatedButton
+                                        .styleFrom(
+                                  backgroundColor:
+                                      const Color(
+                                    0xFF0054A6,
+                                  ),
+                                  foregroundColor:
+                                      Colors.white,
+                                ),
+
+                                onPressed: () {
+
+                                  DashboardController
+                                          .editingHistorialId =
+                                      doc.id;
+
+                                  DashboardController
+                                      .goTo(11);
+                                },
+
+                                child:
+                                    const Text(
+                                  "Editar",
+                                ),
+                              ),
+
+                              const SizedBox(
+                                  width: 6),
+
+                              ElevatedButton(
+                                style:
+                                    ElevatedButton
+                                        .styleFrom(
+                                  backgroundColor:
+                                      const Color(
+                                    0xFFD4B170,
+                                  ),
+                                  foregroundColor:
+                                      Colors.white,
+                                ),
+
+                                onPressed: () {
+
+                                  Navigator.push(
+                                    context,
+
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ComprobanteView(
+                                        idHistorial:
+                                            doc.id,
+                                      ),
+                                    ),
+                                  );
+                                },
+
+                                child:
+                                    const Text(
+                                  "Ver Comprobante",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ));
-  },
-));
+    ),
+  ),
+);
                 },
               ),
             ),

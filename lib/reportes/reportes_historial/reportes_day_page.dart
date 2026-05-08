@@ -277,13 +277,13 @@ class _HistorialReportesDayPageState extends State<HistorialReportesDayPage> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ScrollConfiguration(
+          
           behavior: ScrollConfiguration.of(context).copyWith(
             scrollbars: false,
             dragDevices: {
-              PointerDeviceKind.mouse,
-              PointerDeviceKind.touch,
-              PointerDeviceKind.stylus,
-            },
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
           ),
           child: Scrollbar(
             thumbVisibility: true,

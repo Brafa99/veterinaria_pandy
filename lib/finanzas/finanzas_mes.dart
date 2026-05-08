@@ -455,10 +455,9 @@ Container(
     child: ScrollConfiguration(
       behavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.trackpad,
-        },
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
       ),
       child: Scrollbar(
         thumbVisibility: true,

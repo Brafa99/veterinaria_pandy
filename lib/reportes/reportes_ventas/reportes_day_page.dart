@@ -301,10 +301,9 @@ Widget _table() {
         behavior: ScrollConfiguration.of(context).copyWith(
           scrollbars: false,
           dragDevices: {
-            PointerDeviceKind.mouse,
-            PointerDeviceKind.touch,
-            PointerDeviceKind.stylus,
-          },
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
         ),
         child: Scrollbar(
           controller: _verticalController,

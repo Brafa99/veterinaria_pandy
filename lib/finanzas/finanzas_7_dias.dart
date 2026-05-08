@@ -283,15 +283,12 @@ final screenWidth = MediaQuery.of(context).size.width;
   child: ConstrainedBox(
     constraints: const BoxConstraints(maxWidth: 1200),
     child: ScrollConfiguration(
-      behavior: const ScrollBehavior().copyWith(
-        physics: const BouncingScrollPhysics(),
-        scrollbars: true,
-        dragDevices: {
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.touch,
-          PointerDeviceKind.stylus,
-        },
-      ),
+      behavior: const MaterialScrollBehavior().copyWith(
+  dragDevices: {
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
+),
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(20),

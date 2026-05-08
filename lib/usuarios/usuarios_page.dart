@@ -361,7 +361,6 @@ Widget _btnAdd() {
           behavior: ScrollConfiguration.of(context).copyWith(
             scrollbars: true,
             dragDevices: {
-              PointerDeviceKind.mouse,
               PointerDeviceKind.touch,
               PointerDeviceKind.trackpad,
             },

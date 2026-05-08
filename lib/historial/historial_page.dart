@@ -26,6 +26,7 @@ class _HistorialPageState extends State<HistorialPage> {
   final ScrollController _horizontalController = ScrollController();
   Timer? _debounce;
   double pdfProgress = 0;
+  
   List<Map<String, dynamic>> historial = [];
   Map<String, Map<String, dynamic>> clientesMap = {};
   DocumentSnapshot? lastDoc;
@@ -380,200 +381,245 @@ final isMobile = width < 600;
       child: ScrollConfiguration(
         behavior: const MaterialScrollBehavior().copyWith(
           dragDevices: {
-            PointerDeviceKind.mouse,
             PointerDeviceKind.touch,
             PointerDeviceKind.trackpad,
           },
         ),
 
         child: Scrollbar(
+          controller: _verticalController,
           thumbVisibility: true,
+          interactive: true,
 
-          child: SingleChildScrollView(
-            controller: _verticalController,
-            scrollDirection: Axis.vertical,
+          child: Scrollbar(
+            controller: _horizontalController,
+            thumbVisibility: true,
+            interactive: true,
 
-            child: Scrollbar(
+            notificationPredicate: (notification) {
+              return notification.metrics.axis ==
+                  Axis.horizontal;
+            },
+
+            child: SingleChildScrollView(
               controller: _horizontalController,
-              thumbVisibility: true,
-              notificationPredicate: (n) =>
-                  n.metrics.axis == Axis.horizontal,
+              scrollDirection: Axis.horizontal,
 
-              child: SingleChildScrollView(
-                controller: _horizontalController,
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
+              child: SizedBox(
+                width: 2200,
 
-                child: DataTable(
+                child: SingleChildScrollView(
+                  controller: _verticalController,
+                  scrollDirection: Axis.vertical,
 
-                  /// ================= ESTILO =================
+                  child: DataTable(
 
-                  border: TableBorder.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                    border: TableBorder.all(
+                      color: Colors.grey.shade300,
+                      width: 1,
+                      borderRadius:
+                          BorderRadius.circular(12),
+                    ),
 
-                  headingRowColor:
-                      MaterialStateProperty.all(
-                    const Color(0xFFF5F5F5),
-                  ),
+                    headingRowColor:
+                        MaterialStateProperty.all(
+                      const Color(0xFFF5F5F5),
+                    ),
 
-                  headingTextStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13.5,
-                    color: Colors.black87,
-                  ),
+                    headingTextStyle:
+                        const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13.5,
+                      color: Colors.black87,
+                    ),
 
-                  dataTextStyle: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black87,
-                  ),
+                    dataTextStyle:
+                        const TextStyle(
+                      fontSize: 13,
+                      color: Colors.black87,
+                    ),
 
-                  dataRowMinHeight: 58,
-                  dataRowMaxHeight: 70,
+                    dataRowMinHeight: 58,
+                    dataRowMaxHeight: 70,
 
-                  columnSpacing: 22,
-                  horizontalMargin: 14,
+                    columnSpacing: 22,
+                    horizontalMargin: 14,
+                    dividerThickness: 0.6,
 
-                  dividerThickness: 0.6,
+                    columns: const [
 
-                  /// ================= COLUMNAS =================
+                      DataColumn(label: Text("#")),
+                      DataColumn(label: Text("Mascota")),
+                      DataColumn(label: Text("Raza")),
+                      DataColumn(label: Text("Propietario")),
+                      DataColumn(label: Text("Color")),
+                      DataColumn(label: Text("Especie")),
+                      DataColumn(label: Text("Sexo")),
+                      DataColumn(label: Text("Nacimiento")),
+                      DataColumn(label: Text("Teléfono")),
+                      DataColumn(label: Text("Dirección")),
+                      DataColumn(label: Text("NIT")),
+                      DataColumn(label: Text("Marca/Tatuaje")),
+                      DataColumn(label: Text("Acción")),
+                    ],
 
-                  columns: const [
+                    rows: List.generate(
+                      currentData.length,
+                      (i) {
 
-                    DataColumn(label: Text("#")),
-                    DataColumn(label: Text("Mascota")),
-                    DataColumn(label: Text("Raza")),
-                    DataColumn(label: Text("Propietario")),
-                    DataColumn(label: Text("Color")),
-                    DataColumn(label: Text("Especie")),
-                    DataColumn(label: Text("Sexo")),
-                    DataColumn(label: Text("Nacimiento")),
-                    DataColumn(label: Text("Teléfono")),
-                    DataColumn(label: Text("Dirección")),
-                    DataColumn(label: Text("NIT")),
-                    DataColumn(label: Text("Marca/Tatuaje")),
-                    DataColumn(label: Text("Acción")),
+                        final d = currentData[i];
 
-                  ],
+                        Widget cell(
+                          String v, {
+                          double w = 120,
+                        }) {
 
-                  /// ================= FILAS =================
+                          return SizedBox(
+                            width: w,
+                            child: Text(
+                              v,
+                              maxLines: 2,
+                              overflow:
+                                  TextOverflow.ellipsis,
+                            ),
+                          );
+                        }
 
-                  rows: List.generate(currentData.length, (i) {
+                        return DataRow(
 
-                    final d = currentData[i];
+                          color:
+                              MaterialStateProperty
+                                  .resolveWith<Color?>(
+                            (states) {
+                              if (i.isEven) {
+                                return Colors
+                                    .grey.shade50;
+                              }
+                              return Colors.white;
+                            },
+                          ),
 
-                    Widget cell(String v, {double w = 120}) {
-                      return SizedBox(
-                        width: w,
-                        child: Text(
-                          v,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      );
-                    }
+                          cells: [
 
-                    return DataRow(
+                            DataCell(
+                              Text("${i + 1}"),
+                            ),
 
-                      color: MaterialStateProperty.resolveWith<Color?>(
-                        (states) {
-                          if (i.isEven) {
-                            return Colors.grey.shade50;
-                          }
-                          return Colors.white;
-                        },
-                      ),
+                            DataCell(cell(
+                              safe(d["nombre_mascota"]),
+                              w: 130,
+                            )),
 
-                      cells: [
+                            DataCell(cell(
+                              safe(d["raza"]),
+                            )),
 
-                        DataCell(Text("${i + 1}")),
+                            DataCell(cell(
+                              safe(d["nombre"]),
+                              w: 180,
+                            )),
 
-                        DataCell(cell(
-                          safe(d["nombre_mascota"]),
-                          w: 130,
-                        )),
+                            DataCell(cell(
+                              safe(d["color"]),
+                            )),
 
-                        DataCell(cell(safe(d["raza"]))),
+                            DataCell(cell(
+                              safe(d["especie"]),
+                            )),
 
-                        DataCell(cell(
-                          safe(d["nombre"]),
-                          w: 180,
-                        )),
+                            DataCell(cell(
+                              safe(d["sexo"]),
+                            )),
 
-                        DataCell(cell(safe(d["color"]))),
+                            DataCell(cell(
+                              safe(d["fechanac"]),
+                            )),
 
-                        DataCell(cell(safe(d["especie"]))),
+                            DataCell(cell(
+                              safe(d["telefono"]),
+                            )),
 
-                        DataCell(cell(safe(d["sexo"]))),
+                            DataCell(cell(
+                              safe(d["direccion"]),
+                              w: 180,
+                            )),
 
-                        DataCell(cell(safe(d["fechanac"]))),
+                            DataCell(cell(
+                              safe(d["nit"]),
+                            )),
 
-                        DataCell(cell(safe(d["telefono"]))),
+                            DataCell(cell(
+                              safe(d["marca"]),
+                              w: 140,
+                            )),
 
-                        DataCell(cell(
-                          safe(d["direccion"]),
-                          w: 180,
-                        )),
+                            /// ================= ACCIONES =================
 
-                        DataCell(cell(safe(d["nit"]))),
+                            DataCell(
 
-                        DataCell(cell(
-                          safe(d["marca"]),
-                          w: 140,
-                        )),
+                              SizedBox(
+                                width: 140,
 
-                        /// ================= BOTÓN =================
+                                child:
+                                    ElevatedButton.icon(
 
-                        DataCell(
+                                  onPressed: () {
 
-                          SizedBox(
-                            width: 140,
+                                    DashboardController
+                                            .selectedHistorial =
+                                        d;
 
-                            child: ElevatedButton.icon(
+                                    DashboardController
+                                        .goTo(9);
+                                  },
 
-                              onPressed: () {
+                                  icon: const Icon(
+                                    Icons.visibility,
+                                    size: 17,
+                                  ),
 
-                                DashboardController.selectedHistorial = d;
-                                DashboardController.goTo(9);
+                                  label: const Text(
+                                    "Ver Historial",
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                    ),
+                                  ),
 
-                              },
+                                  style:
+                                      ElevatedButton
+                                          .styleFrom(
 
-                              icon: const Icon(
-                                Icons.visibility,
-                                size: 17,
-                              ),
+                                    backgroundColor:
+                                        const Color(
+                                      0xFF0054A6,
+                                    ),
 
-                              label: const Text(
-                                "Ver Historial",
-                                style: TextStyle(fontSize: 12.5),
-                              ),
+                                    foregroundColor:
+                                        Colors.white,
 
-                              style: ElevatedButton.styleFrom(
+                                    elevation: 1,
 
-                                backgroundColor:
-                                    const Color(0xFF0054A6),
+                                    padding:
+                                        const EdgeInsets
+                                            .symmetric(
+                                      vertical: 12,
+                                    ),
 
-                                foregroundColor: Colors.white,
-
-                                elevation: 1,
-
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                ),
-
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(8),
+                                    shape:
+                                        RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius
+                                              .circular(8),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),

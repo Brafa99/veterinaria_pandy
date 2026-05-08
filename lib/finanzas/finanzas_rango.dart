@@ -361,10 +361,9 @@ Future<void> _calcular() async {
         physics: const BouncingScrollPhysics(),
         scrollbars: true,
         dragDevices: {
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.touch,
-          PointerDeviceKind.stylus,
-        },
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
       ),
       child: SingleChildScrollView(
         child: Padding(

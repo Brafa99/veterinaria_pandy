@@ -154,10 +154,9 @@ Widget _table(List<QueryDocumentSnapshot> docs) {
     behavior: ScrollConfiguration.of(context).copyWith(
       scrollbars: true,
       dragDevices: {
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.touch,
-        PointerDeviceKind.trackpad,
-      },
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
     ),
     child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,

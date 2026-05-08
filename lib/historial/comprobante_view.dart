@@ -113,10 +113,9 @@ Widget _buildComprobante(BuildContext context, Map<String, dynamic> data) {
         physics: const BouncingScrollPhysics(),
         scrollbars: true,
     dragDevices: {
-      PointerDeviceKind.mouse,
-      PointerDeviceKind.touch,
-      PointerDeviceKind.stylus,
-    },
+    PointerDeviceKind.touch,
+    PointerDeviceKind.trackpad,
+  },
       ),
       
       child: SingleChildScrollView(

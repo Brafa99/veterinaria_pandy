@@ -36,6 +36,8 @@ class _ClientesPageState extends State<ClientesPage> {
 List<Map<String, dynamic>> allClientes = [];
 bool searchCacheReady = false;
 bool searchReady = false;
+final horizontalController = ScrollController();
+final verticalController = ScrollController();
 
 List<Map<String, dynamic>> get _docsMapped =>
     docs.map((e) {
@@ -70,6 +72,8 @@ fetchInitial();
 void dispose() {
   scrollController.dispose();
   _debounce?.cancel();
+  horizontalController.dispose();
+verticalController.dispose();
   super.dispose();
 }
 
@@ -404,85 +408,97 @@ final list = currentData;
   final visible = currentData;
 
   return ScrollConfiguration(
-    behavior: ScrollConfiguration.of(context).copyWith(
-      scrollbars: true,
+    behavior: const MaterialScrollBehavior().copyWith(
       dragDevices: {
-        PointerDeviceKind.mouse,
         PointerDeviceKind.touch,
         PointerDeviceKind.trackpad,
       },
     ),
-    child: SingleChildScrollView(
-      controller: scrollController,
-      scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: MediaQuery.of(context).size.width,
-        ),
+
+    child: Scrollbar(
+      controller: verticalController,
+      thumbVisibility: true,
+      interactive: true,
+
+      child: Scrollbar(
+        controller: horizontalController,
+        thumbVisibility: true,
+        interactive: true,
+        notificationPredicate: (notification) {
+          return notification.metrics.axis == Axis.horizontal;
+        },
+
         child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Card(
-            elevation: 3,
-            child: DataTable(
-              columnSpacing: 18,
-              dataRowHeight: 55,
-              border: TableBorder.all(
-                color: Colors.grey.shade600,
-                width: 1.5,
-              ),
+          controller: horizontalController,
+          scrollDirection: Axis.horizontal,
 
-                    headingTextStyle: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+          child: SizedBox(
+            width: 1600,
 
-                    columns: const [
-                      DataColumn(label: Text("#")),
-                      DataColumn(label: Text("Mascota")),
-                      DataColumn(label: Text("Raza")),
-                      DataColumn(label: Text("Color")),
-                      DataColumn(label: Text("Especie")),
-                      DataColumn(label: Text("Sexo")),
-                      DataColumn(label: Text("Propietario")),
-                      DataColumn(label: Text("Teléfono")),
-                      DataColumn(label: Text("Dirección")),
-                      DataColumn(label: Text("CI")),
-                      // DataColumn(label: Text("Correo")),
-                      DataColumn(label: Text("Marca/Tatuaje")),
-                      DataColumn(label: Text("Acciones")),
-                    ],
+            child: SingleChildScrollView(
+              controller: verticalController,
+              scrollDirection: Axis.vertical,
 
-                    rows: List.generate(visible.length, (i) {
-                      final d = visible[i];
+              child: Card(
+                elevation: 3,
 
-                      return DataRow(
-                        cells: [
-                          DataCell(Text("${i + 1}")),
-                          DataCell(Text(d["nombre_mascota"] ?? "")),
-                          DataCell(Text(d["raza"] ?? "")),
-                          DataCell(Text(d["color"] ?? "")),
-                          DataCell(Text(d["especie"] ?? "")),
-                          DataCell(Text(d["sexo"] ?? "")),
-                          DataCell(Text(d["nombre"] ?? "")),
-                          DataCell(Text(d["telefono"] ?? "")),
-                          DataCell(Text(d["direccion"] ?? "")),
-                          DataCell(Text(d["ci"] ?? "")),
-                          // DataCell(Text(d["correo"] ?? "")),
-                          DataCell(Text(
-  (d["marca_tatuaje"] == null || d["marca_tatuaje"] == "")
-      ? "No tiene"
-      : d["marca_tatuaje"],
-)),
-                          DataCell(_actions(context, visible[i]["id"] ?? "")),
-                        ],
-                      );
-                    }),
-                  ),
+                child: DataTable(
+                  columnSpacing: 18,
+                  dataRowHeight: 55,
+
+                  columns: const [
+                    DataColumn(label: Text("#",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)),
+                    DataColumn(label: Text("Mascota",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Raza",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Color",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Especie",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Sexo",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Propietario",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Teléfono",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Dirección",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("CI",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("NIT",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Marca/Tatuaje",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text("Acciones",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
+                  ],
+
+                  rows: List.generate(visible.length, (i) {
+                    final d = visible[i];
+
+                    return DataRow(
+                      cells: [
+                        DataCell(Text("${i + 1}")),
+                        DataCell(Text(d["nombre_mascota"] ?? "")),
+                        DataCell(Text(d["raza"] ?? "")),
+                        DataCell(Text(d["color"] ?? "")),
+                        DataCell(Text(d["especie"] ?? "")),
+                        DataCell(Text(d["sexo"] ?? "")),
+                        DataCell(Text(d["nombre"] ?? "")),
+                        DataCell(Text(d["telefono"] ?? "")),
+                        DataCell(Text(d["direccion"] ?? "")),
+                        DataCell(Text(d["dni"] ?? "")),
+                        DataCell(Text(d["nit"] ?? "")),
+                        DataCell(Text(
+                          (d["marca_tatuaje"] == null ||
+                                  d["marca_tatuaje"] == "")
+                              ? "No tiene"
+                              : d["marca_tatuaje"],
+                        )),
+                        DataCell(
+                          _actions(context, visible[i]["id"] ?? ""),
+                        ),
+                      ],
+                    );
+                  }),
                 ),
               ),
             ),
           ),
-        );
-      }
+        ),
+      ),
+    ),
+  );
+}
   }
 
   // ================= MOBILE =================
