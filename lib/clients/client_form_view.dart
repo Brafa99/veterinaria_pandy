@@ -35,9 +35,11 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
   @override
   void initState() {
     super.initState();
+    verUltimoId();
     if (widget.clienteId != null) {
       isEdit = true;
       _load();
+      
     }
   }
 
@@ -113,10 +115,64 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
     return list.toList();
   }
 
-  Future<void> guardar() async {
-    if (!formKey.currentState!.validate()) return;
+  Future<void> verUltimoId() async {
 
-    setState(() => loading = true);
+  final snap = await FirebaseFirestore.instance
+      .collection("clientes")
+      .get();
+
+  int maxId = 0;
+
+  for (final doc in snap.docs) {
+
+    final data = doc.data();
+
+    final rawId =
+        data["id_cliente"]?.toString() ?? "0";
+
+    final id =
+        int.tryParse(rawId) ?? 0;
+
+    if (id > maxId) {
+      maxId = id;
+    }
+  }
+
+  debugPrint("ULTIMO ID CLIENTE: $maxId");
+}
+
+Future<String> getNextClienteId() async {
+
+  final snap = await FirebaseFirestore.instance
+      .collection("clientes")
+      .get();
+
+  int maxId = 0;
+
+  for (final doc in snap.docs) {
+
+    final data = doc.data();
+
+    final rawId =
+        data["id_cliente"]?.toString() ?? "0";
+
+    final id =
+        int.tryParse(rawId) ?? 0;
+
+    if (id > maxId) {
+      maxId = id;
+    }
+  }
+
+  return (maxId + 1).toString();
+}
+
+  Future<void> guardar() async {
+  if (!formKey.currentState!.validate()) return;
+
+  setState(() => loading = true);
+
+  try {
 
     final data = {
       "nombre_mascota": nombreMascota.text,
@@ -132,31 +188,50 @@ class _ClienteFormPageState extends State<ClienteFormPage> {
       "nombre": nombreDueno.text,
       "telefono": telefono.text,
       "direccion": direccion.text,
-      
-      if (ci.text.trim().isNotEmpty) "ci": ci.text.trim(),
-      if (nit.text.trim().isNotEmpty) "nit": nit.text.trim(),
-      if (correo.text.trim().isNotEmpty) "correo": correo.text.trim(),
+
+      if (ci.text.trim().isNotEmpty)
+        "dni": ci.text.trim(),
+
+      if (nit.text.trim().isNotEmpty)
+        "nit": nit.text.trim(),
+
+      if (correo.text.trim().isNotEmpty)
+        "correo": correo.text.trim(),
 
       "searchIndex": _searchIndex(),
       "updatedAt": FieldValue.serverTimestamp(),
     };
 
-    final ref = FirebaseFirestore.instance.collection("clientes");
+    final ref =
+        FirebaseFirestore.instance.collection("clientes");
 
     if (isEdit) {
+
       await ref.doc(widget.clienteId).update(data);
+
     } else {
+
+      final nextId = await getNextClienteId();
+
       await ref.add({
         ...data,
+        "id_cliente": nextId,
         "createdAt": FieldValue.serverTimestamp(),
       });
     }
 
-    setState(() => loading = false);
-
     DashboardController.editingClienteId = null;
     DashboardController.goTo(4);
+
+  } catch (e) {
+
+    debugPrint("ERROR: $e");
+
+  } finally {
+
+    setState(() => loading = false);
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +309,7 @@ void _volver() {
             _field(color, "Color"),
             _field(especie, "Especie"),
             _field(sexo, "Sexo"),
-            _field(sexo, "Fecha estimada Nacimiento"),
+            _field(fecha_nac, "Fecha estimada Nacimiento"),
 
             const SizedBox(height: 10),
 
