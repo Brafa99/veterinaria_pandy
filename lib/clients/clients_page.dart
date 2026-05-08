@@ -92,6 +92,7 @@ Future<void> loadSearchCache() async {
 
     return {
       "id": e.id,
+      "id_cliente": d["id_cliente"],
       "nombre_mascota": d["nombre_mascota"] ?? "",
       "nombre": d["nombre"] ?? "",
       "telefono": d["telefono"] ?? "",
@@ -177,6 +178,7 @@ Future<void> loadSearchCache() async {
       // Usamos los campos del mapa 'c' asegurándonos de que coincidan con tu caché
       final combinedData = [
         (c["nombre"] ?? ""),
+        (c["id_cliente"] ?? ""),
         (c["nombre_mascota"] ?? ""),
         (c["telefono"] ?? ""),
         (c["dni"] ?? c["ci"] ?? ""), // Soporta ambos nombres de campo por si acaso
