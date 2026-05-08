@@ -311,7 +311,7 @@ final isMobile = width < 600;
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
-                        "# "+d["id_cliente"],
+                        "ID cliente: "+d["id_cliente"],
                         style: const TextStyle(fontSize: 12),
                       ),
                     )
@@ -450,6 +450,7 @@ final isMobile = width < 600;
                     columns: const [
 
                       DataColumn(label: Text("#")),
+                      DataColumn(label: Text("ID Cliente")),
                       DataColumn(label: Text("Mascota")),
                       DataColumn(label: Text("Raza")),
                       DataColumn(label: Text("Propietario")),
@@ -505,6 +506,11 @@ final isMobile = width < 600;
                             DataCell(
                               Text("${i + 1}"),
                             ),
+
+                            DataCell(cell(
+                              safe(d["id_cliente"]),
+                              w: 130,
+                            )),
 
                             DataCell(cell(
                               safe(d["nombre_mascota"]),

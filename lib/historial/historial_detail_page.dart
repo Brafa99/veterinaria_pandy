@@ -166,16 +166,61 @@ Widget _infoPaciente(Map<String, dynamic> d) {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+  children: [
+
+    /// ================= NOMBRE =================
+
+    Expanded(
+      child: Text(
+        d["nombre_mascota"] ?? "Sin nombre",
+
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+
+        overflow: TextOverflow.ellipsis,
+      ),
+    ),
+
+    const SizedBox(width: 10),
+
+    /// ================= ID CLIENTE =================
+
+    Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
+      ),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF0054A6)
+            .withOpacity(0.08),
+
+        borderRadius:
+            BorderRadius.circular(8),
+
+        border: Border.all(
+          color: const Color(0xFF0054A6)
+              .withOpacity(0.25),
+        ),
+      ),
+
+      child: Text(
+        "# ${d["id_cliente"] ?? "-"}",
+
+        style: const TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF0054A6),
+        ),
+      ),
+    ),
+  ],
+),
                           Text(
-                            d["nombre_mascota"] ?? "",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            "Dueño: ${d["nombre"]}",
+                            "Propietario: ${d["nombre"]}",
                             style: const TextStyle(fontSize: 12),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -235,10 +280,59 @@ Widget _infoText(Map d) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
+      Row(
+  children: [
+
+    /// ================= NOMBRE =================
+
+    Expanded(
+      child: Text(
         d["nombre_mascota"] ?? "Sin nombre",
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+
+        overflow: TextOverflow.ellipsis,
       ),
+    ),
+
+    const SizedBox(width: 10),
+
+    /// ================= ID CLIENTE =================
+
+    Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 5,
+      ),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF0054A6)
+            .withOpacity(0.08),
+
+        borderRadius:
+            BorderRadius.circular(8),
+
+        border: Border.all(
+          color: const Color(0xFF0054A6)
+              .withOpacity(0.25),
+        ),
+      ),
+
+      child: Text(
+        "Código cliente: ${d["id_cliente"] ?? "-"}",
+
+        style: const TextStyle(
+          fontSize: 12.5,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF0054A6),
+        ),
+      ),
+    ),
+  ],
+),
       const SizedBox(height: 5),
       Text(
         "${d["raza"] ?? "-"}  •  Dueño: ${d["nombre"] ?? "-"}",

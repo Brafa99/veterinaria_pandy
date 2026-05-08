@@ -433,65 +433,255 @@ final list = currentData;
           scrollDirection: Axis.horizontal,
 
           child: SizedBox(
-            width: 1600,
+            width: 2200,
 
             child: SingleChildScrollView(
               controller: verticalController,
               scrollDirection: Axis.vertical,
 
-              child: Card(
-                elevation: 3,
+             child: Card(
+  elevation: 3,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
 
-                child: DataTable(
-                  columnSpacing: 18,
-                  dataRowHeight: 55,
+  child: DataTable(
 
-                  columns: const [
-                    DataColumn(label: Text("#",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold),)),
-                    DataColumn(label: Text("Mascota",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Raza",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Color",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Especie",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Sexo",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Propietario",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Teléfono",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Dirección",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("CI",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("NIT",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Marca/Tatuaje",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text("Acciones",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold))),
-                  ],
+    /// 🔥 BORDES MÁS VISIBLES
+    border: TableBorder.all(
+      color: Colors.grey.shade300,
+      width: 1,
+      borderRadius: BorderRadius.circular(12),
+    ),
 
-                  rows: List.generate(visible.length, (i) {
-                    final d = visible[i];
+    dividerThickness: 0.8,
 
-                    return DataRow(
-                      cells: [
-                        DataCell(Text("${i + 1}")),
-                        DataCell(Text(d["nombre_mascota"] ?? "")),
-                        DataCell(Text(d["raza"] ?? "")),
-                        DataCell(Text(d["color"] ?? "")),
-                        DataCell(Text(d["especie"] ?? "")),
-                        DataCell(Text(d["sexo"] ?? "")),
-                        DataCell(Text(d["nombre"] ?? "")),
-                        DataCell(Text(d["telefono"] ?? "")),
-                        DataCell(Text(d["direccion"] ?? "")),
-                        DataCell(Text(d["dni"] ?? "")),
-                        DataCell(Text(d["nit"] ?? "")),
-                        DataCell(Text(
-                          (d["marca_tatuaje"] == null ||
-                                  d["marca_tatuaje"] == "")
-                              ? "No tiene"
-                              : d["marca_tatuaje"],
-                        )),
-                        DataCell(
-                          _actions(context, visible[i]["id"] ?? ""),
-                        ),
-                      ],
-                    );
-                  }),
-                ),
+    headingRowColor: MaterialStateProperty.all(
+      const Color(0xFFF1F3F6),
+    ),
+
+    dataRowColor:
+        MaterialStateProperty.resolveWith<Color?>(
+      (states) {
+        return Colors.white;
+      },
+    ),
+
+    headingTextStyle: const TextStyle(
+      color: Colors.black87,
+      fontWeight: FontWeight.bold,
+      fontSize: 13.5,
+    ),
+
+    dataTextStyle: const TextStyle(
+      color: Colors.black87,
+      fontSize: 13,
+    ),
+
+    columnSpacing: 20,
+    horizontalMargin: 14,
+
+    /// 🔥 MÁS ESPACIO VERTICAL
+    dataRowMinHeight: 58,
+    dataRowMaxHeight: 70,
+
+    columns: const [
+
+      DataColumn(
+        label: Text("#"),
+      ),
+
+      DataColumn(
+        label: Text("ID Cliente"),
+      ),
+
+      DataColumn(
+        label: Text("Mascota"),
+      ),
+
+      DataColumn(
+        label: Text("Raza"),
+      ),
+
+      DataColumn(
+        label: Text("Color"),
+      ),
+
+      DataColumn(
+        label: Text("Especie"),
+      ),
+
+      DataColumn(
+        label: Text("Sexo"),
+      ),
+
+      DataColumn(
+        label: Text("Propietario"),
+      ),
+
+      DataColumn(
+        label: Text("Teléfono"),
+      ),
+
+      DataColumn(
+        label: Text("Dirección"),
+      ),
+
+      DataColumn(
+        label: Text("CI"),
+      ),
+
+      DataColumn(
+        label: Text("NIT"),
+      ),
+
+      DataColumn(
+        label: Text("Marca/Tatuaje"),
+      ),
+
+      DataColumn(
+        label: Text("Acciones"),
+      ),
+    ],
+
+    rows: List.generate(visible.length, (i) {
+
+      final d = visible[i];
+
+      /// 🔥 CELDAS CONTROLADAS
+      Widget cell(
+        String text, {
+        double width = 120,
+      }) {
+        return SizedBox(
+          width: width,
+          child: SelectableText(
+            text,
+            maxLines: 2,
+          ),
+        );
+      }
+
+      return DataRow(
+
+        color:
+            MaterialStateProperty.resolveWith<Color?>(
+          (states) {
+            if (i.isEven) {
+              return Colors.grey.shade50;
+            }
+            return Colors.white;
+          },
+        ),
+
+        cells: [
+
+          DataCell(
+            SelectableText("${i + 1}"),
+          ),
+
+          /// 🔥 ID CLIENTE
+          DataCell(
+            cell(
+              "${d["id_cliente"] ?? ""}",
+              width: 90,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["nombre_mascota"] ?? "",
+              width: 140,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["raza"] ?? "",
+              width: 120,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["color"] ?? "",
+              width: 100,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["especie"] ?? "",
+              width: 110,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["sexo"] ?? "",
+              width: 90,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["nombre"] ?? "",
+              width: 180,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["telefono"] ?? "",
+              width: 120,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["direccion"] ?? "",
+              width: 200,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["dni"] ?? "",
+              width: 110,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              d["nit"] ?? "",
+              width: 110,
+            ),
+          ),
+
+          DataCell(
+            cell(
+              (d["marca_tatuaje"] == null ||
+                      d["marca_tatuaje"] == "")
+                  ? "No tiene"
+                  : d["marca_tatuaje"],
+              width: 150,
+            ),
+          ),
+
+          DataCell(
+            SizedBox(
+              width: 180,
+              child: _actions(
+                context,
+                visible[i]["id"] ?? "",
               ),
+            ),
+          ),
+        ],
+      );
+    }),
+  ),
+),
             ),
           ),
         ),

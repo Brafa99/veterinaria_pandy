@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:veterinaria_pandy/dashboard/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,68 +22,93 @@ class _LoginPageState extends State<LoginPage> {
   setState(() => loading = true);
 
   try {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email.text.trim(),
-      password: pass.text.trim(),
-    );
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("rememberMe", rememberMe);
+    await FirebaseAuth.instance
+    .signInWithEmailAndPassword(
+  email: email.text.trim(),
+  password: pass.text.trim(),
+);
+
+final prefs =
+    await SharedPreferences.getInstance();
+
+await prefs.setBool(
+  "rememberMe",
+  rememberMe,
+);
+
+if (!mounted) return;
+
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => const DashboardPage(),
+  ),
+);
 
   } on FirebaseAuthException catch (e) {
+
     String message;
 
-switch (e.code) {
-  case 'user-not-found':
-    message = 'El usuario no existe.';
-    break;
+    switch (e.code) {
 
-  case 'wrong-password':
-    message = 'La contraseña es incorrecta.';
-    break;
+      case 'user-not-found':
+        message = 'El usuario no existe.';
+        break;
 
-  case 'invalid-email':
-    message = 'El correo no es válido.';
-    break;
+      case 'wrong-password':
+        message = 'La contraseña es incorrecta.';
+        break;
 
-  case 'user-disabled':
-    message = 'Este usuario ha sido deshabilitado.';
-    break;
+      case 'invalid-email':
+        message = 'El correo no es válido.';
+        break;
 
-  case 'too-many-requests':
-    message = 'Demasiados intentos. Intenta más tarde.';
-    break;
+      case 'user-disabled':
+        message = 'Este usuario ha sido deshabilitado.';
+        break;
 
-  // 🔥 NUEVO Firebase moderno
-  case 'invalid-credential':
-    message = 'Credenciales incorrectas.';
-    break;
+      case 'too-many-requests':
+        message =
+            'Demasiados intentos. Intenta más tarde.';
+        break;
 
-  case 'network-request-failed':
-    message = 'Error de conexión a internet.';
-    break;
+      case 'invalid-credential':
+        message = 'Credenciales incorrectas.';
+        break;
 
-  default:
-    message = 'Error al iniciar sesión.';
-    debugPrint("FirebaseAuth error: ${e.code} - ${e.message}");
-}
+      case 'network-request-failed':
+        message =
+            'Error de conexión a internet.';
+        break;
+
+      default:
+        message = 'Error al iniciar sesión.';
+    }
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red,
       ),
     );
+
   } catch (e) {
-    // fallback (errores no Firebase)
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text("Ocurrió un error inesperado."),
+        content:
+            Text("Ocurrió un error inesperado."),
         backgroundColor: Colors.red,
       ),
     );
-  }
 
-  setState(() => loading = false);
+  } finally {
+
+    if (mounted) {
+      setState(() => loading = false);
+    }
+  }
 }
 
   bool isMobile(BuildContext context) =>
@@ -104,7 +130,7 @@ switch (e.code) {
       // 🔥 OVERLAY SUAVE (NO OPACA)
       Positioned.fill(
         child: Container(
-          color: Colors.black.withOpacity(0.20), // 👈 clave: más ligero
+          color: Colors.black.withOpacity(0.50), // 👈 clave: más ligero
         ),
       ),
 
