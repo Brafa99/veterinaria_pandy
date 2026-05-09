@@ -320,7 +320,9 @@ Widget build(BuildContext context) {
 
                   itemBuilder: (_, i) {
 
-                    final img = imagenes[i];
+                    final originalImg = imagenes[i];
+
+final img = originalImg.toString();
 
                     return InkWell(
 
@@ -348,10 +350,62 @@ Widget build(BuildContext context) {
 
                                   InteractiveViewer(
                                     child: Image.network(
-                                      img,
-                                      fit: BoxFit.contain,
-                                    ),
-                                  ),
+  img,
+
+  fit: BoxFit.cover,
+
+  webHtmlElementStrategy:
+      WebHtmlElementStrategy.prefer,
+
+  loadingBuilder:
+      (context, child, loadingProgress) {
+
+    if (loadingProgress == null) {
+      return child;
+    }
+
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  },
+
+  errorBuilder:
+      (context, error, stackTrace) {
+
+    debugPrint(
+      "ERROR IMAGE: $error",
+    );
+
+    return Container(
+
+      color: Colors.grey.shade200,
+
+      child: const Center(
+
+        child: Column(
+          mainAxisAlignment:
+              MainAxisAlignment.center,
+
+          children: [
+
+            Icon(
+              Icons.broken_image,
+              size: 45,
+              color: Colors.grey,
+            ),
+
+            SizedBox(height: 10),
+
+            Text(
+              "No se pudo cargar la imagen",
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+)
+),
 
                                   Positioned(
                                     right: 10,
@@ -406,9 +460,59 @@ Widget build(BuildContext context) {
                             children: [
 
                               Image.network(
-                                img,
-                                fit: BoxFit.cover,
-                              ),
+  img,
+
+  fit: BoxFit.contain,
+
+  webHtmlElementStrategy:
+      WebHtmlElementStrategy.prefer,
+
+  loadingBuilder:
+      (context, child, loadingProgress) {
+
+    if (loadingProgress == null) {
+      return child;
+    }
+
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  },
+
+  errorBuilder:
+      (context, error, stackTrace) {
+
+    debugPrint(
+      "ERROR DIALOG IMAGE: $error",
+    );
+
+    return const Center(
+
+      child: Column(
+        mainAxisAlignment:
+            MainAxisAlignment.center,
+
+        children: [
+
+          Icon(
+            Icons.broken_image,
+            color: Colors.white,
+            size: 60,
+          ),
+
+          SizedBox(height: 12),
+
+          Text(
+            "No se pudo visualizar la imagen",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  },
+),
 
                               Positioned(
 

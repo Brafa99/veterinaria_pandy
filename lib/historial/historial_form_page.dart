@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:veterinaria_pandy/dashboard/dashboard_controller.dart';
@@ -28,7 +30,7 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
 
   String tipoServicio = "";
   String tipoPago = "";
-
+  bool habilitarRadiografia = false;
   final picker = ImagePicker();
   bool agregarRadiografia = false;
   final laboratorioUrl = TextEditingController();
@@ -51,6 +53,7 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
       .get();
 
   final d = doc.data();
+  habilitarRadiografia = true;
 
   if (d == null) return;
 
@@ -224,81 +227,80 @@ Future<Uint8List> compressImage(
   XFile file,
 ) async {
 
-  /// ================= WEB =================
   if (kIsWeb) {
 
-    final bytes =
-        await file.readAsBytes();
-
-    final compressed =
-        await FlutterImageCompress.compressWithList(
-
-      bytes,
-
-      minWidth: 1400,
-      quality: 75,
-    );
-
-    return Uint8List.fromList(compressed);
+    return await file.readAsBytes();
   }
-
-  /// ================= MOBILE =================
 
   final result =
       await FlutterImageCompress.compressWithFile(
 
     file.path,
 
-    minWidth: 1400,
-    quality: 75,
+    minWidth: 1200,
+    quality: 70,
   );
 
   return Uint8List.fromList(result!);
 }
 
+
 Future<List<String>> subirImagenes() async {
 
   List<String> urls = [];
 
-  final storage = FirebaseStorage.instanceFor(
-    bucket: "veterinariapandy-73c5d.appspot.com",
-  );
-
   for (final img in nuevasImagenes) {
 
-    Uint8List imageBytes;
+    try {
 
-    if (kIsWeb) {
+      debugPrint("INICIANDO SUBIDA");
 
-      imageBytes = await img.readAsBytes();
+      final imageBytes =
+          await compressImage(img);
 
-    } else {
+      debugPrint(
+        "BYTES OK: ${imageBytes.length}",
+      );
 
-      imageBytes = await compressImage(img);
+      final fileName =
+          const Uuid().v4();
+
+      /// ✅ STORAGE NORMAL
+      final ref = FirebaseStorage.instance
+          .ref()
+          .child(
+            "historial_v2/${widget.historialId}/$fileName.jpg",
+          );
+
+      debugPrint("SUBIENDO...");
+
+      final snapshot =
+          await ref.putData(
+
+        imageBytes,
+
+        SettableMetadata(
+          contentType: "image/jpeg",
+        ),
+      );
+
+      debugPrint(
+        "SUBIDA OK: ${snapshot.state}",
+      );
+
+      final url =
+          await ref.getDownloadURL();
+
+      debugPrint("URL OK: $url");
+
+      urls.add(url);
+
+    } catch (e) {
+
+      debugPrint(
+        "ERROR SUBIENDO IMAGEN: $e",
+      );
     }
-
-    final fileName =
-        const Uuid().v4();
-
-    final ref = storage
-        .ref()
-        .child(
-          "historial_v2/${widget.historialId}/$fileName.jpg",
-        );
-
-    await ref.putData(
-
-      imageBytes,
-
-      SettableMetadata(
-        contentType: "image/jpeg",
-      ),
-    );
-
-    final url =
-        await ref.getDownloadURL();
-
-    urls.add(url);
   }
 
   return urls;
@@ -400,8 +402,6 @@ Future<List<String>> subirImagenes() async {
 
                   // ================= INPUTS EN FILA =================
                   _inputsResponsive(),
-
-                  const SizedBox(height: 25),
 
 
                   const SizedBox(height: 20),
@@ -542,85 +542,100 @@ if (agregarRadiografia) ...[
   const SizedBox(height: 15),
 
   /// ================= IMÁGENES EXISTENTES =================
-  if (imagenesExistentes.isNotEmpty) ...[
+  /// ================= IMÁGENES EXISTENTES =================
+if (imagenesExistentes.isNotEmpty) ...[
 
-    const Text(
-      "Imágenes actuales",
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
+  const Text(
+    "Imágenes actuales",
+    style: TextStyle(
+      fontWeight: FontWeight.bold,
     ),
+  ),
 
-    const SizedBox(height: 10),
+  const SizedBox(height: 10),
 
-    Wrap(
-      spacing: 10,
-      runSpacing: 10,
+  Wrap(
+    spacing: 10,
+    runSpacing: 10,
 
-      children:
-          imagenesExistentes.map((img) {
+    children: imagenesExistentes.map((img) {
 
-        return Stack(
+      return Stack(
+        children: [
 
-          children: [
+          ClipRRect(
+  borderRadius: BorderRadius.circular(12),
 
-            Container(
-              width: 110,
-              height: 110,
+  child: Image.network(
+    img,
 
-              decoration: BoxDecoration(
-                borderRadius:
-                    BorderRadius.circular(12),
+    width: 110,
+    height: 110,
+    fit: BoxFit.cover,
 
-                image: DecorationImage(
-                  image:
-                      NetworkImage(img),
+    gaplessPlayback: true,
 
-                  fit: BoxFit.cover,
+    // 🔥 CLAVE PARA WEB (esto es lo que te falta)
+    webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
+
+    loadingBuilder: (context, child, progress) {
+      if (progress == null) return child;
+
+      return const SizedBox(
+        width: 110,
+        height: 110,
+        child: Center(
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    },
+
+    errorBuilder: (context, error, stackTrace) {
+      debugPrint("GRID IMAGE ERROR: $error");
+
+      return Container(
+        width: 110,
+        height: 110,
+        color: Colors.grey.shade200,
+        child: const Icon(Icons.broken_image),
+      );
+    },
+  ),
+),
+
+          Positioned(
+            right: 0,
+            top: 0,
+
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  imagenesExistentes.remove(img);
+                });
+              },
+
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(4),
+
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 18,
                 ),
               ),
             ),
+          ),
+        ],
+      );
+    }).toList(),
+  ),
 
-            Positioned(
-              right: 0,
-              top: 0,
-
-              child: InkWell(
-
-                onTap: () {
-
-                  setState(() {
-
-                    imagenesExistentes
-                        .remove(img);
-                  });
-                },
-
-                child: Container(
-                  decoration:
-                      const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-
-                  padding:
-                      const EdgeInsets.all(4),
-
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      }).toList(),
-    ),
-
-    const SizedBox(height: 20),
-  ],
+  const SizedBox(height: 20),
+],
 
   /// ================= NUEVAS =================
   ElevatedButton.icon(

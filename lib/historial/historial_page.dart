@@ -28,6 +28,7 @@ class _HistorialPageState extends State<HistorialPage> {
   double pdfProgress = 0;
   bool refreshing = false;
   List<Map<String, dynamic>> historial = [];
+  List<Map<String, dynamic>> historial2 = [];
   Map<String, Map<String, dynamic>> clientesMap = {};
   DocumentSnapshot? lastDoc;
   bool hasMore = true;
@@ -60,6 +61,7 @@ bool searchCacheReady = false;
 
   historial = snap.docs.map((doc) => doc.data()).toList();
 
+
   setState(() => loading = false);
 }
 
@@ -82,6 +84,7 @@ bool searchCacheReady = false;
   }
 
   historial.addAll(snap.docs.map((doc) => doc.data()));
+
 
   if (snap.docs.length < 50) hasMore = false;
 

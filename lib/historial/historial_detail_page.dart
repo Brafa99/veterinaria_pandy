@@ -636,15 +636,28 @@ Widget build(BuildContext context) {
 
   onPressed: () {
 
-    final radiografiaData =
-        h["radiografias_laboratorios"];
+   final radiografiaData =
+    Map<String, dynamic>.from(
+  h["radiografias_laboratorios"] ?? {},
+);
 
-    final imagenes =
-        radiografiaData?["imagenes"] ?? [];
+final List<String> imagenes =
+    List<String>.from(
+  radiografiaData["imagenes"] ?? [],
+);
 
-    final links =
-        radiografiaData?["links"] ?? [];
+final List<String> links =
+    List<String>.from(
+  radiografiaData["links"] ?? [],
+);
 
+debugPrint(
+  "IMAGENES: ${imagenes.length}",
+);
+
+debugPrint(
+  "LINKS: ${links.length}",
+);
     /// 🔥 NO TIENE NADA
     if (imagenes.isEmpty && links.isEmpty) {
 
@@ -1085,14 +1098,30 @@ ElevatedButton(
 
   onPressed: () {
 
+    debugPrint(h.toString());
+
     final radiografiaData =
-        h["radiografias_laboratorios"];
+        Map<String, dynamic>.from(
+      h["radiografias_laboratorios"] ?? {},
+    );
 
-    final imagenes =
-        radiografiaData?["imagenes"] ?? [];
+    final List<String> imagenes =
+        List<String>.from(
+      radiografiaData["imagenes"] ?? [],
+    );
 
-    final links =
-        radiografiaData?["links"] ?? [];
+    final List<String> links =
+        List<String>.from(
+      radiografiaData["links"] ?? [],
+    );
+
+    debugPrint(
+      "IMAGENES WEB: ${imagenes.length}",
+    );
+
+    debugPrint(
+      "LINKS WEB: ${links.length}",
+    );
 
     /// 🔥 NO TIENE NADA
     if (imagenes.isEmpty && links.isEmpty) {
@@ -1116,7 +1145,9 @@ ElevatedButton(
                 Navigator.pop(context);
               },
 
-              child: const Text("Cancelar"),
+              child: const Text(
+                "Cancelar",
+              ),
             ),
 
             ElevatedButton(
@@ -1155,7 +1186,8 @@ ElevatedButton(
       context,
 
       MaterialPageRoute(
-        builder: (_) => HistorialAdjuntosPreviewPage(
+        builder: (_) =>
+            HistorialAdjuntosPreviewPage(
           historialId: doc.id,
           data: h,
         ),

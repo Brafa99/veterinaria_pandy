@@ -33,7 +33,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
 
 final laboratorioUrl = TextEditingController();
 
-List<XFile> imagenesSeleccionadas = [];
+List<Uint8List> imagenesBytes = [];
 
 final picker = ImagePicker();
 
@@ -69,39 +69,25 @@ final picker = ImagePicker();
   }
 
   Future<void> seleccionarImagenes() async {
-
-  final disponibles = 2 - imagenesSeleccionadas.length;
+  final disponibles = 2 - imagenesBytes.length;
 
   if (disponibles <= 0) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Máximo 2 imágenes"),
-      ),
+      const SnackBar(content: Text("Máximo 2 imágenes")),
     );
     return;
   }
 
-  final imgs = await picker.pickMultiImage(
-    imageQuality: 85,
-  );
+  final imgs = await picker.pickMultiImage(imageQuality: 85);
 
   if (imgs.isEmpty) return;
 
-  if (imgs.length > disponibles) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          "Solo puedes agregar $disponibles imagen(es) más",
-        ),
-      ),
-    );
+  for (final img in imgs.take(disponibles)) {
+    final bytes = await img.readAsBytes();
+    imagenesBytes.add(bytes);
   }
 
-  setState(() {
-    imagenesSeleccionadas.addAll(
-      imgs.take(disponibles),
-    );
-  });
+  setState(() {});
 }
 
 Future<Uint8List> compressImage(
@@ -140,146 +126,114 @@ Future<Uint8List> compressImage(
   return Uint8List.fromList(result!);
 }
 
-Future<List<String>> subirImagenes(
-  String historialId,
-) async {
 
+Future<List<String>> subirImagenes(String historialId) async {
   List<String> urls = [];
 
-  final storage = FirebaseStorage.instanceFor(
-    bucket:
-        "veterinariapandy-73c5d.appspot.com",
-  );
+  for (final bytes in imagenesBytes) {
+    final fileName = const Uuid().v4();
 
-  for (final img in imagenesSeleccionadas) {
-
-    final compressed =
-        await compressImage(img);
-
-    final fileName =
-        const Uuid().v4();
-
-    final ref = storage
+    final ref = FirebaseStorage.instance
         .ref()
-        .child(
-          "historial_v2/$historialId/$fileName.jpg",
-        );
+        .child("historial_v2/$historialId/$fileName.jpg");
 
     await ref.putData(
-
-      compressed,
-
-      SettableMetadata(
-        contentType: "image/jpeg",
-      ),
+      bytes,
+      SettableMetadata(contentType: "image/jpeg"),
     );
 
-    final url =
-        await ref.getDownloadURL();
-
+    final url = await ref.getDownloadURL();
     urls.add(url);
   }
 
   return urls;
 }
 
-  // ================= GUARDAR =================
   Future<void> guardar() async {
-    if (!formKey.currentState!.validate()) return;
+  if (!formKey.currentState!.validate()) return;
 
-    if (tipoServicio.isEmpty || tipoPago.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Completa servicio y pago")),
-      );
-      return;
-    }
-
-    final ctx = DashboardController.selectedHistorial ?? {};
-    final idCliente = ctx["id_cliente"];
-
-    if (idCliente == null) return;
-
-    setState(() => loading = true);
-    debugPrint("CTX COMPLETO:");
-    debugPrint(ctx.toString());
-
-    try {
-
-      List<String> imagenesUrls = [];
-
-if (agregarRadiografia &&
-    imagenesSeleccionadas.isNotEmpty) {
-
-  imagenesUrls = await subirImagenes(
-    previewId,
-  );
-}
-
-      await FirebaseFirestore.instance
-          .collection("historial_v2")
-          .doc(previewId) // 🔥 usamos el ID generado
-          .set({
-  "id_cliente": idCliente,
-
-  "nombre_mascota": ctx["nombre_mascota"] ?? "",
-  "nombre_dueno": ctx["nombre"] ?? "",
-
-  // 🔥 AGREGA ESTO
-  "raza": ctx["raza"] ?? "",
-  "color": ctx["color"] ?? "",
-  "especie": ctx["especie"] ?? "",
-  "sexo": ctx["sexo"] ?? "",
-  "telefono": ctx["telefono"] ?? "",
-  "direccion": ctx["direccion"] ?? "",
-  "ci": ctx["ci"] ?? "",
-  "marca": ctx["marca"] ?? "",
-
-  // REGISTRO
-  "descripcion": descripcion.text.trim(),
-  "tipo_historial": tipoServicio,
-  "precioh": double.tryParse(precio.text.trim()) ?? 0,
-  "tipo_pago": tipoPago,
-
-  "fecha_registro": FieldValue.serverTimestamp(),
-  "createdAt": FieldValue.serverTimestamp(),
-  "radiografias_laboratorios": {
-  "imagenes": imagenesUrls,
-  "url": laboratorioUrl.text.trim(),
-  "updatedAt": FieldValue.serverTimestamp(),
-},
-});
-
-      // ================= REGISTRAR INGRESO =================
-final monto = double.tryParse(precio.text.trim()) ?? 0;
-
-if (monto > 0) {
-  await FirebaseFirestore.instance
-      .collection("ingresos")
-      .add({
-    "monto": monto,
-    "fecha": FieldValue.serverTimestamp(),
-
-    // 🔥 metadata útil (muy recomendable)
-    "origen": "historial",
-    "id_historial": previewId,
-    "id_cliente": idCliente,
-    "tipo_pago": tipoPago,
-    "descripcion": descripcion.text.trim(),
-
-    "createdAt": FieldValue.serverTimestamp(),
-  });
-}
-
-      DashboardController.goTo(9); // 🔥 volver a detalle
-
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al guardar")),
-      );
-    } finally {
-      setState(() => loading = false);
-    }
+  if (tipoServicio.isEmpty || tipoPago.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Completa servicio y pago")),
+    );
+    return;
   }
+
+  final ctx = DashboardController.selectedHistorial ?? {};
+  final idCliente = ctx["id_cliente"];
+
+  if (idCliente == null) return;
+
+  setState(() => loading = true);
+
+  try {
+    // ================= SUBIDA DE IMÁGENES =================
+    List<String> imagenesUrls = [];
+
+    if (agregarRadiografia && imagenesBytes.isNotEmpty) {
+      imagenesUrls = await subirImagenes(previewId);
+    }
+
+    // ================= DATA BASE HISTORIAL =================
+    await FirebaseFirestore.instance
+        .collection("historial_v2")
+        .doc(previewId)
+        .set({
+      "id_cliente": idCliente,
+      "nombre_mascota": ctx["nombre_mascota"] ?? "",
+      "nombre_dueno": ctx["nombre"] ?? "",
+
+      "raza": ctx["raza"] ?? "",
+      "color": ctx["color"] ?? "",
+      "especie": ctx["especie"] ?? "",
+      "sexo": ctx["sexo"] ?? "",
+      "telefono": ctx["telefono"] ?? "",
+      "direccion": ctx["direccion"] ?? "",
+      "ci": ctx["ci"] ?? "",
+      "marca": ctx["marca"] ?? "",
+
+      "descripcion": descripcion.text.trim(),
+      "tipo_historial": tipoServicio,
+      "precioh": double.tryParse(precio.text.trim()) ?? 0,
+      "tipo_pago": tipoPago,
+
+      "fecha_registro": FieldValue.serverTimestamp(),
+      "createdAt": FieldValue.serverTimestamp(),
+
+      "radiografias_laboratorios": {
+        "imagenes": imagenesUrls,
+        "url": laboratorioUrl.text.trim(),
+        "updatedAt": FieldValue.serverTimestamp(),
+      },
+    }, SetOptions(merge: true)); // 🔥 IMPORTANTE
+
+    // ================= INGRESOS =================
+    final monto = double.tryParse(precio.text.trim()) ?? 0;
+
+    if (monto > 0) {
+      await FirebaseFirestore.instance.collection("ingresos").add({
+        "monto": monto,
+        "fecha": FieldValue.serverTimestamp(),
+        "origen": "historial",
+        "id_historial": previewId,
+        "id_cliente": idCliente,
+        "tipo_pago": tipoPago,
+        "descripcion": descripcion.text.trim(),
+        "createdAt": FieldValue.serverTimestamp(),
+      });
+    }
+
+    DashboardController.goTo(9);
+  } catch (e) {
+    debugPrint("ERROR GUARDAR HISTORIAL: $e");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Error al guardar")),
+    );
+  } finally {
+    setState(() => loading = false);
+  }
+}
 
   // ================= UI =================
   @override
@@ -554,78 +508,29 @@ Container(
 
               const SizedBox(height: 15),
 
-              if (imagenesSeleccionadas.isNotEmpty)
+              if (imagenesBytes.isNotEmpty)
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+  spacing: 12,
+  runSpacing: 12,
 
-                  children:
-                      imagenesSeleccionadas.map((img) {
-
-                    return Stack(
-                      children: [
-
-                        Container(
-                          width: 100,
-                          height: 100,
-
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    14),
-
-                            border: Border.all(
-                              color:
-                                  Colors.grey.shade300,
-                            ),
-
-                            image: DecorationImage(
-                              image: FileImage(
-                                File(img.path),
-                              ),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-
-                        Positioned(
-                          top: 5,
-                          right: 5,
-
-                          child: GestureDetector(
-
-                            onTap: () {
-
-                              setState(() {
-                                imagenesSeleccionadas
-                                    .remove(img);
-                              });
-                            },
-
-                            child: Container(
-                              padding:
-                                  const EdgeInsets.all(4),
-
-                              decoration:
-                                  const BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-
-                  }).toList(),
-                ),
-
+  children: imagenesBytes.map((bytes) {
+    return Stack(
+      children: [
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            image: DecorationImage(
+              image: MemoryImage(bytes),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      ],
+    );
+  }).toList(),
+),
               const SizedBox(height: 16),
 
               TextFormField(
@@ -656,61 +561,6 @@ Container(
     ],
   ),
 ),
-
-if (agregarRadiografia) ...[
-
-  const SizedBox(height: 10),
-
-  SizedBox(
-    width: double.infinity,
-    child: ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF0054A6),
-      ),
-      onPressed: seleccionarImagenes,
-      icon: const Icon(Icons.image,color: Colors.white),
-      label: const Text(
-        "Seleccionar Imágenes (Máx 2)",
-        style: TextStyle(color: Colors.white),
-      ),
-    ),
-  ),
-
-  const SizedBox(height: 10),
-
-  if (imagenesSeleccionadas.isNotEmpty)
-    Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: imagenesSeleccionadas.map((img) {
-        return Container(
-          width: 90,
-          height: 90,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: DecorationImage(
-  image: kIsWeb
-      ? NetworkImage(img.path) as ImageProvider
-      : FileImage(File(img.path)),
-  fit: BoxFit.cover,
-),
-          ),
-        );
-      }).toList(),
-    ),
-
-  const SizedBox(height: 15),
-
-  TextFormField(
-    controller: laboratorioUrl,
-    decoration: const InputDecoration(
-      labelText: "Link Laboratorio/Radiografía",
-      border: OutlineInputBorder(),
-      prefixIcon: Icon(Icons.link),
-    ),
-  ),
-],
-
 
                   const SizedBox(height: 25),
 
