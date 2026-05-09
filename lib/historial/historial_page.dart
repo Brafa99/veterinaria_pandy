@@ -47,20 +47,27 @@ bool searchCacheReady = false;
   setState(() {
     loading = true;
     historial.clear();
-    lastDoc = null;
-    hasMore = true;
   });
 
+  // Filtro de 7 días para no saturar
+  DateTime haceUnaSemana = DateTime.now().subtract(const Duration(days: 7));
+
   final snap = await FirebaseFirestore.instance
-      .collection("clientes")
+      .collection("historial_v2") // Asegúrate que sea historial
+      .where("fecha_registro", isGreaterThanOrEqualTo: haceUnaSemana)
+      .orderBy("fecha_registro", descending: true)
       .limit(50)
       .get();
 
   if (snap.docs.isNotEmpty) {
     lastDoc = snap.docs.last;
+    // Mapeamos los datos asegurando que el ID del documento se guarde
+    historial = snap.docs.map((doc) {
+      final data = doc.data();
+      data["id"] = doc.id; // Importante para el botón de "Ver Comprobante"
+      return data;
+    }).toList();
   }
-
-  historial = snap.docs.map((doc) => doc.data()).toList();
 
   setState(() => loading = false);
 }
@@ -242,6 +249,7 @@ final isMobile = width < 600;
 
     return SelectionArea(
   child: Padding(
+    
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [

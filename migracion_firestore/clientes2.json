@@ -1,0 +1,27 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"veterinaria_sistemasenoferta"},
+{"type":"table","name":"clientes","database":"veterinaria_sistemasenoferta","data":
+[
+{"id_cliente":"5861","nombre":"Cristian guzman","telefono":".","dni":".","nombre_mascota":"Clara ","fechanac":"2020-04-23","raza":"Mestiza","correo":"","color":"Blanco ","especie":"Canina","sexo":"Hembra","direccion":""},
+{"id_cliente":"5862","nombre":"Pilar Fernandez","telefono":"79562461","dni":"9174780","nombre_mascota":"Pretta","fechanac":"2026-02-10","raza":"Mestizo","correo":"","color":"Negro","especie":"Canina","sexo":"Hembra","direccion":"Irpavi Calle 1, edf. mendizabal dep. 1A "},
+{"id_cliente":"5863","nombre":"Jaret Viscarra ","telefono":"70695524","dni":"8467876","nombre_mascota":"Bill","fechanac":"2026-01-23","raza":"Mestizo","correo":"","color":"Negro","especie":"Felino","sexo":"Macho","direccion":"Vergel c\/4 Irpavi Edif Vengala Deoto 306"},
+{"id_cliente":"5864","nombre":"Grace Romero","telefono":"70659453","dni":"3428701","nombre_mascota":"Milo","fechanac":"2026-10-20","raza":"Mestizo","correo":"","color":"Naranja","especie":"Felino","sexo":"Macho","direccion":"Bolognia calle 1 # 158"},
+{"id_cliente":"5865","nombre":"Raul Mejia \/ Tellez ","telefono":"79664241","dni":"4922463","nombre_mascota":"Bella (Bela)","fechanac":"2018-02-10","raza":"Cooker","correo":"","color":"cafe","especie":"Canina","sexo":"Hembra","direccion":"Irpavi Caballero # 7026"},
+{"id_cliente":"5866","nombre":"Martinez","telefono":"78112228","dni":"4826143","nombre_mascota":"Filipo","fechanac":"2016-03-10","raza":"Mestizo","correo":"","color":"Blanco ","especie":"Canina","sexo":"Macho","direccion":"Irpavi 2 Calle 2 # 500"},
+{"id_cliente":"5867","nombre":"Pamela Cusiquinanqui","telefono":"77792871","dni":"8466817","nombre_mascota":"Howl (Jow)","fechanac":"0206-01-20","raza":"Mestizo","correo":"","color":"gris","especie":"Felino","sexo":"Macho","direccion":"Av. Los Sargentos"},
+{"id_cliente":"5868","nombre":"Lisset Gandarillas","telefono":"67598694","dni":"2898812","nombre_mascota":"kIithy (Kiti)","fechanac":"2024-02-15","raza":"Mestizo","correo":"","color":"Blanco y negro","especie":"Felina","sexo":"Hembra","direccion":"Irpavi calle 1 Edf. Heroes"},
+{"id_cliente":"5869","nombre":"Brenda Alvarado","telefono":"70131412","dni":"6962667","nombre_mascota":"Toby","fechanac":"2026-02-15","raza":"Husky Siberiano","correo":"","color":"cafe","especie":"Canina","sexo":"Macho","direccion":"Irpavi calle Av. Gobles #6576"},
+{"id_cliente":"5870","nombre":"\tValeria MuÃ±oz Barbery","telefono":"78288806","dni":"6156835","nombre_mascota":"Pili","fechanac":"2020-03-15","raza":"Mestizo","correo":"","color":"Blanco y negro","especie":"Felino","sexo":"Hembra","direccion":"Lomas de Alto Irpavi c\/4 #183B"},
+{"id_cliente":"5871","nombre":"Valeria MuÃ±oz Barbery","telefono":"78288806","dni":"6156835","nombre_mascota":"Mili","fechanac":"2020-02-15","raza":"Mestizo","correo":"","color":"Blanco y negro","especie":"Felino","sexo":"Hembra","direccion":"Lomas de Alto Irpavi c\/4 #183B"},
+{"id_cliente":"5872","nombre":"Ines Fabian Mayta","telefono":"68049313","dni":"4884426","nombre_mascota":"Charlotte","fechanac":"2025-11-15","raza":"Mestizo","correo":"","color":"Negro","especie":"Canina","sexo":"Hembra","direccion":"Irpavi calle 6 Av Vera NÂª 6581"},
+{"id_cliente":"5873","nombre":"Karen Vonvogler","telefono":"73015950","dni":"2395050","nombre_mascota":"MuÃ±eca","fechanac":"2018-02-15","raza":"Samoyedo","correo":"","color":"Blanco ","especie":"Canina","sexo":"Hembra","direccion":"Av, Heroinas 16 de Julio #1141"},
+{"id_cliente":"5874","nombre":"Jorge Roman","telefono":"68214369","dni":"3352072","nombre_mascota":"Gerges","fechanac":"2024-01-03","raza":"Pastor Belga","correo":"","color":"Negro","especie":"Canina","sexo":"Macho","direccion":"Av. Gobles no 6888"},
+{"id_cliente":"5875","nombre":"Valeria MuÃ±oz Barbery","telefono":"78288806","dni":"6156835","nombre_mascota":"Lili Put","fechanac":"2016-05-12","raza":"Mestiza","correo":"esterilizada","color":"Plomo y Blanco","especie":"Felina","sexo":"Hembra","direccion":"Lomas de Alto Irpavi c\/4 #183B"},
+{"id_cliente":"5876","nombre":"Noelia Canaza Dorado","telefono":"73773366","dni":"8340696","nombre_mascota":"Perla","fechanac":"2015-08-06","raza":"Mestizo","correo":"23617V","color":"Blanco ","especie":"Canina","sexo":"Hembra","direccion":"Alto Obrajes Sector B  Calle Guido Villagomez NÂª1131"},
+{"id_cliente":"5877","nombre":"Noelia Canaza Dorado","telefono":"73773366","dni":"8340696","nombre_mascota":"Pushi","fechanac":"2018-05-12","raza":"Mestiza","correo":"Esterilizada","color":"naranja\/ blanco","especie":"Felino","sexo":"Hembra","direccion":"Alto Obrajes Sector B  Calle Guido Villagomez NÂª1131"},
+{"id_cliente":"5878","nombre":"Solange Ramos","telefono":"76560207","dni":"3348527","nombre_mascota":"Burbujita (Burbuja)","fechanac":"2026-01-05","raza":"Mestizo","correo":"","color":"Tricolor","especie":"Felina","sexo":"Hembra","direccion":"Irpavi calle 3 # 6868"},
+{"id_cliente":"5879","nombre":"Victor Luis Quispe ","telefono":"73210036","dni":"5992477","nombre_mascota":"Migo","fechanac":"2022-08-08","raza":"Mestizo","correo":"","color":"Balnco y Negro","especie":"Felino","sexo":"Macho","direccion":"Bolognia calle 12 NÂª400"}
+]
+}
+]

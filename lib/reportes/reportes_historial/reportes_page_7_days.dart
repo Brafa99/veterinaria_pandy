@@ -25,6 +25,8 @@ class _HistorialReportesLast7DaysPageState
   bool loadingPrint = false;
   String search = "";
   final ScrollController _verticalController = ScrollController();
+  final ScrollController _horizontalController = ScrollController();
+
 
   @override
   void initState() {
@@ -254,171 +256,79 @@ Widget _btnHeader(
     );
   }
 
-  // ================= TABLE MODERNA =================
-  Widget _table() {
+ Widget _table() {
   if (filteredData.isEmpty) {
-    return const Center(child: Text("Sin registros en los últimos 7 días"));
+    return const Center(child: Text("Sin registros"));
   }
 
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      return ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(
-          scrollbars: false,
-          dragDevices: {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.trackpad,
-  },
-        ),
-        child: Scrollbar(
-          controller: _verticalController,
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-          
-              physics: const AlwaysScrollableScrollPhysics(),
-
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: 900,
-                ),
-
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.shade500,
-                      width: 1.5,
-                    ),
-                  ),
-
-                  child: DataTable(
-                    columnSpacing: 18,
-                    headingRowHeight: 45,
-                    dataRowMinHeight: 45,
-                    dataRowMaxHeight: double.infinity,
-
-                    headingRowColor: MaterialStateProperty.all(
-                      Colors.grey.shade200,
-                    ),
-
-                    border: TableBorder(
-                      horizontalInside: BorderSide(
-                        color: Colors.grey.shade400,
-                        width: 1,
+  return SelectionArea(
+    child: Scrollbar(
+      controller: _horizontalController,
+      thumbVisibility: true,
+      trackVisibility: true,
+      thickness: 8,
+      // IMPORTANTE: Ubica la barra horizontal en la parte inferior de la pantalla
+      child: SingleChildScrollView(
+        controller: _horizontalController,
+        scrollDirection: Axis.horizontal,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 1000),
+          child: Column(
+            children: [
+              // HEADER FIJO (Opcional: Si quieres que los títulos no se muevan)
+              // Aquí envolvemos solo el contenido de las filas en el scroll vertical
+              Expanded(
+                child: Scrollbar(
+                  controller: _verticalController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: _verticalController,
+                    scrollDirection: Axis.vertical,
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 20), // Espacio para la barra
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade500, width: 1.5),
                       ),
-                      verticalInside: BorderSide(
-                        color: Colors.grey.shade400,
-                        width: 1,
-                      ),
-                      top: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                      bottom: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                      left: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                      right: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                    ),
-
-                    columns: const [
-                      DataColumn(
-                          label: Text("Fecha",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text("Mascota",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text("Cliente",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text("Tipo",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text("Detalle",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text("Precio",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                              DataColumn(
-  label: Text("Tipo Pago",
-    style: TextStyle(fontWeight: FontWeight.bold),
-  ),
-),
-                      DataColumn(
-                          label: Text("Acciones",
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                    ],
-
-                    rows: filteredData.map((e) {
-                      return DataRow(cells: [
-                        DataCell(Text(
-                          (e["fecha_registro"] is Timestamp)
-                              ? DateFormat('dd/MM/yyyy').format(
-                                  (e["fecha_registro"] as Timestamp)
-                                      .toDate())
-                              : "-",
-                        )),
-                        DataCell(Text(e["nombre_mascota"] ?? "")),
-                        DataCell(Text(e["nombre_dueno"] ?? "")),
-                        DataCell(Text(e["tipo_historial"] ?? "")),
-                        DataCell(
-  ConstrainedBox(
-    constraints: const BoxConstraints(
-      maxWidth: 250, // 🔥 clave (ajusta a tu gusto)
-    ),
-    child: Text(
-      (e["descripcion"] ?? "").toString(),
-      softWrap: true,
-      overflow: TextOverflow.visible,
-      style: const TextStyle(fontSize: 13),
-    ),
-  ),
-),
-                        DataCell(Text("Bs ${e["precioh"] ?? 0}")),
-                        DataCell(
-  Text(
-    (e["tipo_pago"] ?? "-").toString(),
-  ),
-),
-                        DataCell(
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF0054A6),
-                              foregroundColor: Colors.white,
+                      child: DataTable(
+                        columnSpacing: 20,
+                        headingRowColor: MaterialStateProperty.all(Colors.grey.shade200),
+                        columns: const [
+                          DataColumn(label: Text("Fecha", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Mascota", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Propietario", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Tipo", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Detalle", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Precio", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Tipo Pago", style: TextStyle(fontWeight: FontWeight.bold))),
+                          DataColumn(label: Text("Acciones", style: TextStyle(fontWeight: FontWeight.bold))),
+                        ],
+                        rows: filteredData.map((e) {
+                          return DataRow(cells: [
+                            DataCell(Text(DateFormat('dd/MM/yyyy').format((e["fecha_registro"] as Timestamp).toDate()))),
+                            DataCell(Text(e["nombre_mascota"] ?? "")),
+                            DataCell(Text(e["nombre_dueno"] ?? "")),
+                            DataCell(Text(e["tipo_historial"] ?? "")),
+                            DataCell(
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 300),
+                                child: Text((e["descripcion"] ?? "").toString()),
+                              ),
                             ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ComprobanteView(
-                                    idHistorial: e["id"],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: const Text("Ver Comprobante"),
-                          ),
-                        ),
-                      ]);
-                    }).toList(),
+                            DataCell(Text("Bs ${e["precioh"] ?? 0}")),
+                            DataCell(Text(e["tipo_pago"] ?? "-")),
+                            DataCell(ElevatedButton(onPressed: () {}, child: const Text("Ver Comprobante"))),
+                          ]);
+                        }).toList(),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
-      );
-    },
+      ),
+    ),
   );
 }
 

@@ -354,7 +354,7 @@ Center(
                       columns: const [
                         DataColumn(label: Text("Fecha", style: TextStyle(fontWeight: FontWeight.bold))),
                         DataColumn(label: Text("Mascota", style: TextStyle(fontWeight: FontWeight.bold))),
-                        DataColumn(label: Text("Cliente", style: TextStyle(fontWeight: FontWeight.bold))),
+                        DataColumn(label: Text("Propietario", style: TextStyle(fontWeight: FontWeight.bold))),
                         DataColumn(label: Text("Tipo", style: TextStyle(fontWeight: FontWeight.bold))),
                         DataColumn(label: Text("Detalle", style: TextStyle(fontWeight: FontWeight.bold))),
                         DataColumn(label: Text("Precio", style: TextStyle(fontWeight: FontWeight.bold))),

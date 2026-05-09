@@ -71,7 +71,7 @@ async function repararRegistros() {
             descripcion: String(h.descripcion || ""),
             tipo_historial: h.tipo_historial || "Consulta Medica",
             precioh: Number(h.precioh) || Number(h.precio) || 0,
-            fecha_registro: normalizarFecha(h.fecha_registro || h.fecha),
+            fecha_registro: h.fecha_registro,
             id_cliente: idC,
             // CORRECCIÓN DE CAMPOS SEGÚN TU ESTRUCTURA
             nombre_mascota: c?.nombre_mascota || "Desconocido",

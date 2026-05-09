@@ -26,10 +26,12 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
   @override
   void initState() {
     super.initState();
+    final ctx = DashboardController.selectedHistorial ?? {};
+    final idCliente = ctx["id_cliente"];
+    debugPrint(idCliente);
 
     // 🔥 generar ID visual (como referencia)
-    previewId =
-        FirebaseFirestore.instance.collection("historial_v2").doc().id;
+    previewId = idCliente;
   }
 
   // ================= CHIP =================
@@ -70,7 +72,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
 
     setState(() => loading = true);
     debugPrint("CTX COMPLETO:");
-     debugPrint(ctx.toString());
+    debugPrint(ctx.toString());
 
     try {
       await FirebaseFirestore.instance
@@ -80,7 +82,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
   "id_cliente": idCliente,
 
   "nombre_mascota": ctx["nombre_mascota"] ?? "",
-  "nombre_dueno": ctx["nombre_dueno"] ?? "",
+  "nombre_dueno": ctx["nombre"] ?? "",
 
   // 🔥 AGREGA ESTO
   "raza": ctx["raza"] ?? "",
@@ -166,7 +168,7 @@ if (monto > 0) {
 
                   // ================= ID HISTORIAL =================
                   const Text(
-                    "ID HISTORIAL",
+                    "ID CLIENTE",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
 

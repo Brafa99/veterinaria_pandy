@@ -351,7 +351,7 @@ Widget _table() {
 
                     columns: const [
   DataColumn(label: Text("Fecha", style: TextStyle(fontWeight: FontWeight.bold))),
-  DataColumn(label: Text("Cliente", style: TextStyle(fontWeight: FontWeight.bold))),
+  DataColumn(label: Text("Propietario", style: TextStyle(fontWeight: FontWeight.bold))),
   DataColumn(label: Text("Mascota", style: TextStyle(fontWeight: FontWeight.bold))),
   DataColumn(label: Text("Productos", style: TextStyle(fontWeight: FontWeight.bold))),
   DataColumn(label: Text("Total", style: TextStyle(fontWeight: FontWeight.bold))),

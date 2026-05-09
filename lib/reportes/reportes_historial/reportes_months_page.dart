@@ -400,7 +400,6 @@ Widget _btnHeader(
   );
 }
 
-  // ================= TABLE =================
   Widget _table() {
   if (!hasSearched) {
     return const Center(child: Text("Selecciona filtros"));
@@ -408,157 +407,110 @@ Widget _btnHeader(
 
   if (filteredData.isEmpty) {
     return Center(
-  child: Text(
-    hasSearched
-        ? "No hay resultados"
-        : "Selecciona mes y año",
-  ),
-);
+      child: Text(hasSearched ? "No hay resultados" : "Selecciona mes y año"),
+    );
   }
 
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      return ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(
-          scrollbars: true,
-          dragDevices: {
-    PointerDeviceKind.touch,
-    PointerDeviceKind.trackpad,
-  },
-        ),
-        child: Scrollbar(
-  controller: _verticalController,
-  thumbVisibility: true,
-  child: SingleChildScrollView(
-    controller: _verticalController,
-    scrollDirection: Axis.vertical,
-    child: SingleChildScrollView(
+  // 1. SelectionArea para permitir copiar texto sin usar SelectableText individual
+  return SelectionArea(
+    child: Scrollbar(
       controller: _horizontalController,
-      scrollDirection: Axis.horizontal,
-      physics: const AlwaysScrollableScrollPhysics(),
-
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 800),
-
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey.shade500,
-                      width: 1.5,
-                    ),
-                  ),
-
-                  child: DataTable(
-                    columnSpacing: 12,
-headingRowHeight: 40,
-dataRowMinHeight: 40,
-
-                    headingRowColor: MaterialStateProperty.all(
-                      Colors.grey.shade200,
-                    ),
-
-                    border: TableBorder(
-                      horizontalInside: BorderSide(
-                        color: Colors.grey.shade400,
-                        width: 1,
-                      ),
-                      verticalInside: BorderSide(
-                        color: Colors.grey.shade400,
-                        width: 1,
-                      ),
-                      top: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                      bottom: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                      left: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                      right: BorderSide(
-                        color: Colors.grey.shade500,
-                        width: 1.5,
-                      ),
-                    ),
-
-                    columns: const [
-                      DataColumn(label: Text("Fecha", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("Mascota", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("Cliente", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("TipoHistorial", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("Detalle", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("Precio", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("Tipo Pago", style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(label: Text("Acciones")),
-                    ],
-
-                    rows: filteredData.map((e) {
-                      return DataRow(cells: [
-                        DataCell(Text(
-                          (e["fecha_registro"] is Timestamp)
-                              ? DateFormat('dd/MM/yyyy').format(
-                                  (e["fecha_registro"] as Timestamp).toDate())
-                              : "-",
-                        )),
-                        DataCell(Text(e["nombre_mascota"] ?? "")),
-                        DataCell(Text(e["nombre_dueno"] ?? "")),
-                        DataCell(
-  ConstrainedBox(
-    constraints: const BoxConstraints(maxWidth: 120),
-    child: Text(e["tipo_historial"] ?? ""),
-  ),
-),
-
-                        /// 🔥 DESCRIPCIÓN CONTROLADA
-                        DataCell(
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 200),
-                            child: Text(
-  (e["descripcion"] ?? "").toString(),
-  softWrap: true,
-  style: const TextStyle(fontSize: 12),
-),
-                          ),
+      thumbVisibility: true,
+      trackVisibility: true,
+      thickness: 12,
+      child: SingleChildScrollView(
+        controller: _horizontalController,
+        scrollDirection: Axis.horizontal,
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: ConstrainedBox(
+          // Forzamos el ancho mínimo para que la barra siempre tenga recorrido
+          constraints: const BoxConstraints(minWidth: 1000), 
+          child: Column(
+            children: [
+              // 2. El Scroll Vertical va DENTRO del Horizontal
+              Expanded(
+                child: Scrollbar(
+                  controller: _verticalController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: _verticalController,
+                    scrollDirection: Axis.vertical,
+                    child: Padding(
+                      // Espacio inferior para que la barra horizontal no tape la última fila
+                      padding: const EdgeInsets.only(bottom: 25), 
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade500, width: 1.5),
                         ),
-
-                        DataCell(Text("Bs ${e["precioh"] ?? 0}")),
-
-                        DataCell(
-                          Text((e["tipo_pago"] ?? "-").toString()),
-                        ),
-
-                        DataCell(
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFF0054A6),
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ComprobanteView(
-                                    idHistorial: e["id"],
+                        child: DataTable(
+                          columnSpacing: 12,
+                          headingRowHeight: 40,
+                          dataRowMinHeight: 45, // Un poco más de aire para el lag visual
+                          headingRowColor: MaterialStateProperty.all(Colors.grey.shade200),
+                          // Simplifiqué el TableBorder para mejorar el rendimiento de renderizado
+                          border: TableBorder.all(color: Colors.grey.shade400, width: 0.5),
+                          columns: const [
+                            DataColumn(label: Text("Fecha", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Mascota", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Propietario", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Tipo", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Detalle", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Precio", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Tipo Pago", style: TextStyle(fontWeight: FontWeight.bold))),
+                            DataColumn(label: Text("Acciones", style: TextStyle(fontWeight: FontWeight.bold))),
+                          ],
+                          rows: filteredData.map((e) {
+                            return DataRow(cells: [
+                              DataCell(Text((e["fecha_registro"] is Timestamp)
+                                  ? DateFormat('dd/MM/yyyy').format((e["fecha_registro"] as Timestamp).toDate())
+                                  : "-")),
+                              DataCell(Text(e["nombre_mascota"] ?? "")),
+                              DataCell(Text(e["nombre_dueno"] ?? "")),
+                              DataCell(Text(e["tipo_historial"] ?? "")),
+                              DataCell(
+                                ConstrainedBox(
+                                  constraints: const BoxConstraints(maxWidth: 200),
+                                  child: Text(
+                                    (e["descripcion"] ?? "").toString(),
+                                    maxLines: 2, // Limitar líneas reduce el lag de layout
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
-                              );
-                            },
-                            child: const Text("Ver Comprobante"),
-                          ),
+                              ),
+                              DataCell(Text("Bs ${e["precioh"] ?? 0}")),
+                              DataCell(Text((e["tipo_pago"] ?? "-").toString())),
+                              DataCell(
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0054A6),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => ComprobanteView(idHistorial: e["id"]),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text("Ver Comprobante", style: TextStyle(fontSize: 11)),
+                                ),
+                              ),
+                            ]);
+                          }).toList(),
                         ),
-                      ]);
-                    }).toList(),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
         ),
-      );
-    },
+      ),
+    ),
   );
 }
 

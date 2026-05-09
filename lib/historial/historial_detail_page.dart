@@ -352,6 +352,8 @@ Widget _infoText(Map d) {
 }
 
 Widget _headerResponsive() {
+
+  debugPrint("data_detail: "+widget.data.toString());
   final width = MediaQuery.of(context).size.width;
   final isMobile = width < 800;
 
@@ -371,10 +373,14 @@ Widget _headerResponsive() {
         label: const Text("Imprimir", style: TextStyle(color: Colors.white)),
         style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
       ),
+
       ElevatedButton.icon(
         onPressed: () {
           DashboardController.selectedHistorial =
               Map<String, dynamic>.from(widget.data);
+
+
+
           DashboardController.goTo(10);
         },
         icon: const Icon(Icons.add,color: Colors.white,),
