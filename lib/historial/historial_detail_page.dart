@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:printing/printing.dart';
 import 'package:veterinaria_pandy/dashboard/dashboard_controller.dart';
 import 'package:veterinaria_pandy/historial/comprobante_view.dart';
+import 'package:veterinaria_pandy/historial/historial_adjuntos_preview.dart';
 import 'package:veterinaria_pandy/services/file_service.dart';
 import 'package:veterinaria_pandy/services/pdf_service.dart' as PdfService;
 
@@ -335,7 +336,7 @@ Widget _infoText(Map d) {
 ),
       const SizedBox(height: 5),
       Text(
-        "${d["raza"] ?? "-"}  •  Dueño: ${d["nombre"] ?? "-"}",
+        "${d["raza"] ?? "-"}  •  Propietario: ${d["nombre"] ?? "-"}",
         style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
       ),
       const SizedBox(height: 8),
@@ -626,6 +627,97 @@ Widget build(BuildContext context) {
                                       child: const Text(
                                           "Ver Comprobante"),
                                     ),
+
+                                    ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFF0054A6),
+    foregroundColor: Colors.white,
+  ),
+
+  onPressed: () {
+
+    final radiografiaData =
+        h["radiografias_laboratorios"];
+
+    final imagenes =
+        radiografiaData?["imagenes"] ?? [];
+
+    final links =
+        radiografiaData?["links"] ?? [];
+
+    /// 🔥 NO TIENE NADA
+    if (imagenes.isEmpty && links.isEmpty) {
+
+      showDialog(
+        context: context,
+
+        builder: (_) => AlertDialog(
+          title: const Text(
+            "Sin archivos adjuntos",
+          ),
+
+          content: const Text(
+            "Este historial no tiene radiografías o laboratorios adjuntos.\n\n¿Desea editar este registro para agregarlos?",
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+
+              child: const Text("Cancelar"),
+            ),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color(0xFF0054A6),
+              ),
+
+              onPressed: () {
+
+                Navigator.pop(context);
+
+                DashboardController
+                        .editingHistorialId =
+                    doc.id;
+
+                DashboardController.goTo(11);
+              },
+
+              child: const Text(
+                "Editar",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      return;
+    }
+
+    /// 🔥 TIENE DATOS
+    Navigator.push(
+      context,
+
+      MaterialPageRoute(
+        builder: (_) => HistorialAdjuntosPreviewPage(
+          historialId: doc.id,
+          data: h,
+        ),
+      ),
+    );
+  },
+
+  child: const Text(
+    "Radiografías/Laboratorios",
+  ),
+),
                                   ],
                                 )
                               ],
@@ -826,33 +918,95 @@ return SelectionArea(
                             children: [
 
                               ElevatedButton(
-                                style:
-                                    ElevatedButton
-                                        .styleFrom(
-                                  backgroundColor:
-                                      Colors
-                                          .grey
-                                          .shade800,
-                                  foregroundColor:
-                                      Colors.white,
-                                ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.grey.shade800,
+    foregroundColor: Colors.white,
+  ),
 
-                                onPressed:
-                                    () async {
+  onPressed: () async {
 
-                                  await FirebaseFirestore
-                                      .instance
-                                      .collection(
-                                          "historial_v2")
-                                      .doc(doc.id)
-                                      .delete();
-                                },
+    final confirm = await showDialog<bool>(
+      context: context,
 
-                                child:
-                                    const Text(
-                                  "Eliminar",
-                                ),
-                              ),
+      builder: (_) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+
+          title: const Text(
+            "Eliminar Registro",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          content: const Text(
+            "¿Seguro que deseas eliminar este historial clínico?\n\nEsta acción no se puede deshacer.",
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+
+              child: const Text("Cancelar"),
+            ),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+
+              child: const Text("Eliminar"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true) return;
+
+    try {
+
+      await FirebaseFirestore.instance
+          .collection("historial_v2")
+          .doc(doc.id)
+          .delete();
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Registro eliminado correctamente",
+          ),
+        ),
+      );
+
+    } catch (e) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Error al eliminar el registro",
+          ),
+        ),
+      );
+    }
+  },
+
+  child: const Text(
+    "Eliminar",
+  ),
+),
 
                               const SizedBox(
                                   width: 6),
@@ -862,9 +1016,9 @@ return SelectionArea(
                                     ElevatedButton
                                         .styleFrom(
                                   backgroundColor:
-                                      const Color(
-                                    0xFF0054A6,
-                                  ),
+                                      
+                                    Colors.blue,
+                                  
                                   foregroundColor:
                                       Colors.white,
                                 ),
@@ -920,6 +1074,101 @@ return SelectionArea(
                                   "Ver Comprobante",
                                 ),
                               ),
+
+                              const SizedBox(width: 6),
+
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: const Color(0xFF0054A6),
+    foregroundColor: Colors.white,
+  ),
+
+  onPressed: () {
+
+    final radiografiaData =
+        h["radiografias_laboratorios"];
+
+    final imagenes =
+        radiografiaData?["imagenes"] ?? [];
+
+    final links =
+        radiografiaData?["links"] ?? [];
+
+    /// 🔥 NO TIENE NADA
+    if (imagenes.isEmpty && links.isEmpty) {
+
+      showDialog(
+        context: context,
+
+        builder: (_) => AlertDialog(
+          title: const Text(
+            "Sin archivos adjuntos",
+          ),
+
+          content: const Text(
+            "Este historial no tiene radiografías o laboratorios adjuntos.\n\n¿Desea editar este registro para agregarlos?",
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+
+              child: const Text("Cancelar"),
+            ),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    const Color(0xFF0054A6),
+              ),
+
+              onPressed: () {
+
+                Navigator.pop(context);
+
+                DashboardController
+                        .editingHistorialId =
+                    doc.id;
+
+                DashboardController.goTo(11);
+              },
+
+              child: const Text(
+                "Editar",
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      return;
+    }
+
+    /// 🔥 TIENE DATOS
+    Navigator.push(
+      context,
+
+      MaterialPageRoute(
+        builder: (_) => HistorialAdjuntosPreviewPage(
+          historialId: doc.id,
+          data: h,
+        ),
+      ),
+    );
+  },
+
+  child: const Text(
+    "Radiografías/Laboratorios",
+  ),
+),
+
+
                             ],
                           ),
                         ),

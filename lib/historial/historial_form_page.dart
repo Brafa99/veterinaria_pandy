@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:veterinaria_pandy/dashboard/dashboard_controller.dart';
-
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:veterinaria_pandy/dashboard/dashboard_controller.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 class HistorialFormPage extends StatefulWidget {
   final String historialId;
@@ -26,6 +29,13 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
   String tipoServicio = "";
   String tipoPago = "";
 
+  final picker = ImagePicker();
+  bool agregarRadiografia = false;
+  final laboratorioUrl = TextEditingController();
+  List<XFile> nuevasImagenes = [];
+  List<String> imagenesExistentes = [];
+  List<String> linksExistentes = [];
+
   @override
   void initState() {
     super.initState();
@@ -34,25 +44,51 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
 
   // ================= LOAD =================
   Future<void> _load() async {
-    final doc = await FirebaseFirestore.instance
-        .collection("historial_v2")
-        .doc(widget.historialId)
-        .get();
 
-    final d = doc.data();
-    if (d == null) return;
+  final doc = await FirebaseFirestore.instance
+      .collection("historial_v2")
+      .doc(widget.historialId)
+      .get();
 
-    setState(() {
-      descripcion.text = (d["descripcion"] ?? "").toString();
-      precio.text = (d["precioh"] ?? "").toString();
+  final d = doc.data();
 
-      // 🔥 IMPORTANTE (compatibilidad)
-      tipoServicio =
-          (d["tipo_historial"] ?? d["tipo_servicio"] ?? "").toString();
+  if (d == null) return;
 
-      tipoPago = (d["tipo_pago"] ?? "").toString();
-    });
-  }
+  final radiografiaData =
+      d["radiografias_laboratorios"] ?? {};
+
+  setState(() {
+
+    descripcion.text =
+        (d["descripcion"] ?? "").toString();
+
+    precio.text =
+        (d["precioh"] ?? "").toString();
+
+    tipoServicio =
+        (d["tipo_historial"] ??
+                d["tipo_servicio"] ??
+                "")
+            .toString();
+
+    tipoPago =
+        (d["tipo_pago"] ?? "").toString();
+
+    imagenesExistentes =
+        List<String>.from(
+      radiografiaData["imagenes"] ?? [],
+    );
+
+    linksExistentes =
+        List<String>.from(
+      radiografiaData["links"] ?? [],
+    );
+
+    agregarRadiografia =
+        imagenesExistentes.isNotEmpty ||
+            linksExistentes.isNotEmpty;
+  });
+}
 
   // ================= GUARDAR =================
   Future<void> guardar() async {
@@ -66,21 +102,58 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
     }
 
     setState(() => loading = true);
+    final nuevasUrls =
+    await subirImagenes();
+
+final todasLasImagenes = [
+  ...imagenesExistentes,
+  ...nuevasUrls,
+];
+
+final todosLosLinks = [
+  ...linksExistentes,
+];
+
+if (laboratorioUrl.text.trim().isNotEmpty) {
+
+  todosLosLinks.add(
+    laboratorioUrl.text.trim(),
+  );
+}
 
     try {
       await FirebaseFirestore.instance
-          .collection("historial_v2")
-          .doc(widget.historialId)
-          .update({
-        "descripcion": descripcion.text.trim(),
-        "precioh": double.tryParse(precio.text.trim()) ?? 0,
+    .collection("historial_v2")
+    .doc(widget.historialId)
+    .update({
 
-        // 🔥 UNIFICAMOS NOMBRE
-        "tipo_historial": tipoServicio,
-        "tipo_pago": tipoPago,
+  "descripcion":
+      descripcion.text.trim(),
 
-        "updatedAt": FieldValue.serverTimestamp(),
-      });
+  "precioh":
+      double.tryParse(
+            precio.text.trim(),
+          ) ??
+          0,
+
+  "tipo_historial":
+      tipoServicio,
+
+  "tipo_pago":
+      tipoPago,
+
+  "radiografias_laboratorios": {
+
+    "imagenes":
+        todasLasImagenes,
+
+    "links":
+        todosLosLinks,
+  },
+
+  "updatedAt":
+      FieldValue.serverTimestamp(),
+});
 
       DashboardController.goTo(9);
 
@@ -112,6 +185,124 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
       ),
     );
   }
+
+  Future<void> seleccionarImagenes() async {
+
+  final totalActual =
+      imagenesExistentes.length +
+      nuevasImagenes.length;
+
+  if (totalActual >= 2) {
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          "Máximo 2 imágenes",
+        ),
+      ),
+    );
+
+    return;
+  }
+
+  final imgs = await picker.pickMultiImage();
+
+  if (imgs.isEmpty) return;
+
+  final disponibles = 2 - totalActual;
+
+  setState(() {
+
+    nuevasImagenes.addAll(
+      imgs.take(disponibles),
+    );
+  });
+}
+
+
+Future<Uint8List> compressImage(
+  XFile file,
+) async {
+
+  /// ================= WEB =================
+  if (kIsWeb) {
+
+    final bytes =
+        await file.readAsBytes();
+
+    final compressed =
+        await FlutterImageCompress.compressWithList(
+
+      bytes,
+
+      minWidth: 1400,
+      quality: 75,
+    );
+
+    return Uint8List.fromList(compressed);
+  }
+
+  /// ================= MOBILE =================
+
+  final result =
+      await FlutterImageCompress.compressWithFile(
+
+    file.path,
+
+    minWidth: 1400,
+    quality: 75,
+  );
+
+  return Uint8List.fromList(result!);
+}
+
+Future<List<String>> subirImagenes() async {
+
+  List<String> urls = [];
+
+  final storage = FirebaseStorage.instanceFor(
+    bucket: "veterinariapandy-73c5d.appspot.com",
+  );
+
+  for (final img in nuevasImagenes) {
+
+    Uint8List imageBytes;
+
+    if (kIsWeb) {
+
+      imageBytes = await img.readAsBytes();
+
+    } else {
+
+      imageBytes = await compressImage(img);
+    }
+
+    final fileName =
+        const Uuid().v4();
+
+    final ref = storage
+        .ref()
+        .child(
+          "historial_v2/${widget.historialId}/$fileName.jpg",
+        );
+
+    await ref.putData(
+
+      imageBytes,
+
+      SettableMetadata(
+        contentType: "image/jpeg",
+      ),
+    );
+
+    final url =
+        await ref.getDownloadURL();
+
+    urls.add(url);
+  }
+
+  return urls;
+}
 
   // ================= UI =================
   @override
@@ -211,6 +402,350 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
                   _inputsResponsive(),
 
                   const SizedBox(height: 25),
+
+
+                  const SizedBox(height: 20),
+
+Container(
+  decoration: BoxDecoration(
+    color: const Color(0xFFF8FAFD),
+    borderRadius: BorderRadius.circular(16),
+
+    border: Border.all(
+      color: agregarRadiografia
+          ? const Color(0xFF0054A6)
+          : Colors.grey.shade300,
+      width: 1.4,
+    ),
+
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.04),
+        blurRadius: 8,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  ),
+
+  child: SwitchListTile(
+
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 8,
+    ),
+
+    value: agregarRadiografia,
+
+    activeColor: const Color(0xFF0054A6),
+
+    secondary: Container(
+      padding: const EdgeInsets.all(10),
+
+      decoration: BoxDecoration(
+        color: const Color(0xFF0054A6)
+            .withOpacity(0.10),
+
+        borderRadius: BorderRadius.circular(12),
+      ),
+
+      child: const Icon(
+        Icons.medical_services_outlined,
+        color: Color(0xFF0054A6),
+      ),
+    ),
+
+    title: const Text(
+      "Radiografías / Laboratorios",
+
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 15,
+      ),
+    ),
+
+    subtitle: Padding(
+      padding: const EdgeInsets.only(top: 4),
+
+      child: Text(
+        agregarRadiografia
+            ? "Puedes agregar, reemplazar o eliminar imágenes y enlaces."
+            : "Adjunta radiografías, resultados o links externos.",
+
+        style: TextStyle(
+          color: Colors.grey.shade700,
+          height: 1.3,
+        ),
+      ),
+    ),
+
+    onChanged: (v) {
+
+      setState(() {
+
+        agregarRadiografia = v;
+      });
+    },
+  ),
+),
+
+if (agregarRadiografia) ...[
+
+  AnimatedContainer(
+  duration: const Duration(milliseconds: 250),
+
+  margin: const EdgeInsets.only(top: 14),
+
+  padding: const EdgeInsets.all(16),
+
+  decoration: BoxDecoration(
+    color: Colors.white,
+
+    borderRadius: BorderRadius.circular(16),
+
+    border: Border.all(
+      color: Colors.grey.shade300,
+    ),
+  ),
+
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+
+      const Row(
+        children: [
+
+          Icon(
+            Icons.folder_open,
+            color: Color(0xFF0054A6),
+          ),
+
+          SizedBox(width: 8),
+
+          Text(
+            "Archivos adjuntos",
+
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+
+      const SizedBox(height: 18),
+
+      // TODO tu contenido actual aquí
+    ],
+  ),
+),
+
+  const SizedBox(height: 15),
+
+  /// ================= IMÁGENES EXISTENTES =================
+  if (imagenesExistentes.isNotEmpty) ...[
+
+    const Text(
+      "Imágenes actuales",
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+
+    const SizedBox(height: 10),
+
+    Wrap(
+      spacing: 10,
+      runSpacing: 10,
+
+      children:
+          imagenesExistentes.map((img) {
+
+        return Stack(
+
+          children: [
+
+            Container(
+              width: 110,
+              height: 110,
+
+              decoration: BoxDecoration(
+                borderRadius:
+                    BorderRadius.circular(12),
+
+                image: DecorationImage(
+                  image:
+                      NetworkImage(img),
+
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+
+            Positioned(
+              right: 0,
+              top: 0,
+
+              child: InkWell(
+
+                onTap: () {
+
+                  setState(() {
+
+                    imagenesExistentes
+                        .remove(img);
+                  });
+                },
+
+                child: Container(
+                  decoration:
+                      const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+
+                  padding:
+                      const EdgeInsets.all(4),
+
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    ),
+
+    const SizedBox(height: 20),
+  ],
+
+  /// ================= NUEVAS =================
+  ElevatedButton.icon(
+
+    style: ElevatedButton.styleFrom(
+      backgroundColor:
+          const Color(0xFF0054A6),
+    ),
+
+    onPressed: seleccionarImagenes,
+
+    icon: const Icon(
+      Icons.image,
+      color: Colors.white,
+    ),
+
+    label: const Text(
+      "Agregar imágenes (Máximo 2)",
+      style: TextStyle(
+        color: Colors.white,
+      ),
+    ),
+  ),
+
+  const SizedBox(height: 12),
+
+  if (nuevasImagenes.isNotEmpty)
+
+    Wrap(
+      spacing: 10,
+      runSpacing: 10,
+
+      children:
+          nuevasImagenes.map((img) {
+
+        return Container(
+          width: 110,
+          height: 110,
+
+          decoration: BoxDecoration(
+            borderRadius:
+                BorderRadius.circular(12),
+
+            image: DecorationImage(
+
+              image: kIsWeb
+                  ? NetworkImage(img.path)
+                  : FileImage(
+                      File(img.path),
+                    ) as ImageProvider,
+
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      }).toList(),
+    ),
+
+  const SizedBox(height: 20),
+
+  /// ================= LINKS =================
+  if (linksExistentes.isNotEmpty) ...[
+
+    const Text(
+      "Links actuales",
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+
+    const SizedBox(height: 10),
+
+    ...linksExistentes.map((link) {
+
+      return Card(
+
+        child: ListTile(
+
+          leading:
+              const Icon(Icons.link),
+
+          title: Text(
+            link,
+            maxLines: 1,
+            overflow:
+                TextOverflow.ellipsis,
+          ),
+
+          trailing: IconButton(
+
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+
+            onPressed: () {
+
+              setState(() {
+
+                linksExistentes
+                    .remove(link);
+              });
+            },
+          ),
+        ),
+      );
+    }),
+  ],
+
+  const SizedBox(height: 15),
+
+  TextFormField(
+    controller: laboratorioUrl,
+
+    decoration: const InputDecoration(
+      labelText:
+          "Nuevo link laboratorio",
+      border: OutlineInputBorder(),
+      prefixIcon: Icon(Icons.link),
+    ),
+  ),
+],
+
+    const SizedBox(height: 20),
+
 
                   // ================= BOTÓN =================
                   SizedBox(

@@ -1,6 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:veterinaria_pandy/dashboard/dashboard_controller.dart';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:uuid/uuid.dart';
 
 class HistorialCreatePage extends StatefulWidget {
   const HistorialCreatePage({super.key});
@@ -21,7 +28,14 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
   
   String tipoPago = "";
 
-  String previewId = ""; // 🔥 ID visual
+  String previewId = "";
+  bool agregarRadiografia = false;
+
+final laboratorioUrl = TextEditingController();
+
+List<XFile> imagenesSeleccionadas = [];
+
+final picker = ImagePicker();
 
   @override
   void initState() {
@@ -54,6 +68,121 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
     );
   }
 
+  Future<void> seleccionarImagenes() async {
+
+  final disponibles = 2 - imagenesSeleccionadas.length;
+
+  if (disponibles <= 0) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Máximo 2 imágenes"),
+      ),
+    );
+    return;
+  }
+
+  final imgs = await picker.pickMultiImage(
+    imageQuality: 85,
+  );
+
+  if (imgs.isEmpty) return;
+
+  if (imgs.length > disponibles) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          "Solo puedes agregar $disponibles imagen(es) más",
+        ),
+      ),
+    );
+  }
+
+  setState(() {
+    imagenesSeleccionadas.addAll(
+      imgs.take(disponibles),
+    );
+  });
+}
+
+Future<Uint8List> compressImage(
+  XFile file,
+) async {
+
+  /// ================= WEB =================
+  if (kIsWeb) {
+
+    final bytes =
+        await file.readAsBytes();
+
+    final compressed =
+        await FlutterImageCompress.compressWithList(
+
+      bytes,
+
+      minWidth: 1400,
+      quality: 75,
+    );
+
+    return Uint8List.fromList(compressed);
+  }
+
+  /// ================= MOBILE =================
+
+  final result =
+      await FlutterImageCompress.compressWithFile(
+
+    file.path,
+
+    minWidth: 1400,
+    quality: 75,
+  );
+
+  return Uint8List.fromList(result!);
+}
+
+Future<List<String>> subirImagenes(
+  String historialId,
+) async {
+
+  List<String> urls = [];
+
+  final storage = FirebaseStorage.instanceFor(
+    bucket:
+        "veterinariapandy-73c5d.appspot.com",
+  );
+
+  for (final img in imagenesSeleccionadas) {
+
+    final compressed =
+        await compressImage(img);
+
+    final fileName =
+        const Uuid().v4();
+
+    final ref = storage
+        .ref()
+        .child(
+          "historial_v2/$historialId/$fileName.jpg",
+        );
+
+    await ref.putData(
+
+      compressed,
+
+      SettableMetadata(
+        contentType: "image/jpeg",
+      ),
+    );
+
+    final url =
+        await ref.getDownloadURL();
+
+    urls.add(url);
+  }
+
+  return urls;
+}
+
   // ================= GUARDAR =================
   Future<void> guardar() async {
     if (!formKey.currentState!.validate()) return;
@@ -75,6 +204,17 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
     debugPrint(ctx.toString());
 
     try {
+
+      List<String> imagenesUrls = [];
+
+if (agregarRadiografia &&
+    imagenesSeleccionadas.isNotEmpty) {
+
+  imagenesUrls = await subirImagenes(
+    previewId,
+  );
+}
+
       await FirebaseFirestore.instance
           .collection("historial_v2")
           .doc(previewId) // 🔥 usamos el ID generado
@@ -102,6 +242,11 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
 
   "fecha_registro": FieldValue.serverTimestamp(),
   "createdAt": FieldValue.serverTimestamp(),
+  "radiografias_laboratorios": {
+  "imagenes": imagenesUrls,
+  "url": laboratorioUrl.text.trim(),
+  "updatedAt": FieldValue.serverTimestamp(),
+},
 });
 
       // ================= REGISTRAR INGRESO =================
@@ -234,7 +379,7 @@ if (monto > 0) {
                   
                   const SizedBox(height: 20),
 
-                  // ================= PAGO =================
+                        // ================= PAGO =================
                   const Text(
                     "Tipo de Pago",
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -265,6 +410,307 @@ if (monto > 0) {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+
+
+
+Container(
+  margin: const EdgeInsets.symmetric(vertical: 10),
+
+  decoration: BoxDecoration(
+    color: const Color(0xFFF7FAFD),
+    borderRadius: BorderRadius.circular(16),
+
+    border: Border.all(
+      color: agregarRadiografia
+          ? const Color(0xFF0054A6)
+          : Colors.grey.shade300,
+      width: 1.4,
+    ),
+
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.04),
+        blurRadius: 8,
+        offset: const Offset(0, 3),
+      ),
+    ],
+  ),
+
+  child: Column(
+    children: [
+
+      SwitchListTile(
+
+        value: agregarRadiografia,
+
+        activeColor: const Color(0xFF0054A6),
+
+        secondary: Container(
+          padding: const EdgeInsets.all(10),
+
+          decoration: BoxDecoration(
+            color: const Color(0xFF0054A6)
+                .withOpacity(0.10),
+
+            borderRadius:
+                BorderRadius.circular(12),
+          ),
+
+          child: const Icon(
+            Icons.medical_information_outlined,
+            color: Color(0xFF0054A6),
+          ),
+        ),
+
+        title: const Text(
+          "Radiografías/Laboratorios",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
+
+        subtitle: const Padding(
+          padding: EdgeInsets.only(top: 4),
+          child: Text(
+            "Adjunta imágenes médicas o enlaces externos del laboratorio",
+            style: TextStyle(
+              height: 1.3,
+            ),
+          ),
+        ),
+
+        onChanged: (v) {
+          setState(() {
+            agregarRadiografia = v;
+          });
+        },
+      ),
+
+      /// CONTENIDO
+      AnimatedCrossFade(
+
+        duration:
+            const Duration(milliseconds: 250),
+
+        crossFadeState: agregarRadiografia
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
+
+        firstChild: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            16,
+          ),
+
+          child: Column(
+            children: [
+
+              const Divider(),
+
+              const SizedBox(height: 10),
+
+              SizedBox(
+                width: double.infinity,
+
+                child: ElevatedButton.icon(
+
+                  style:
+                      ElevatedButton.styleFrom(
+                    backgroundColor:
+                        const Color(0xFF0054A6),
+
+                    padding:
+                        const EdgeInsets.symmetric(
+                      vertical: 14,
+                    ),
+
+                    shape:
+                        RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(12),
+                    ),
+                  ),
+
+                  onPressed: seleccionarImagenes,
+
+                  icon: const Icon(
+                    Icons.image_outlined,
+                    color: Colors.white,
+                  ),
+
+                  label: const Text(
+                    "Seleccionar Imágenes",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              if (imagenesSeleccionadas.isNotEmpty)
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+
+                  children:
+                      imagenesSeleccionadas.map((img) {
+
+                    return Stack(
+                      children: [
+
+                        Container(
+                          width: 100,
+                          height: 100,
+
+                          decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.circular(
+                                    14),
+
+                            border: Border.all(
+                              color:
+                                  Colors.grey.shade300,
+                            ),
+
+                            image: DecorationImage(
+                              image: FileImage(
+                                File(img.path),
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+
+                        Positioned(
+                          top: 5,
+                          right: 5,
+
+                          child: GestureDetector(
+
+                            onTap: () {
+
+                              setState(() {
+                                imagenesSeleccionadas
+                                    .remove(img);
+                              });
+                            },
+
+                            child: Container(
+                              padding:
+                                  const EdgeInsets.all(4),
+
+                              decoration:
+                                  const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+
+                              child: const Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+
+                  }).toList(),
+                ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: laboratorioUrl,
+
+                decoration: InputDecoration(
+                  labelText:
+                      "Link laboratorio/radiografía",
+
+                  prefixIcon:
+                      const Icon(Icons.link),
+
+                  filled: true,
+                  fillColor: Colors.white,
+
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        secondChild: const SizedBox.shrink(),
+      ),
+    ],
+  ),
+),
+
+if (agregarRadiografia) ...[
+
+  const SizedBox(height: 10),
+
+  SizedBox(
+    width: double.infinity,
+    child: ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF0054A6),
+      ),
+      onPressed: seleccionarImagenes,
+      icon: const Icon(Icons.image,color: Colors.white),
+      label: const Text(
+        "Seleccionar Imágenes (Máx 2)",
+        style: TextStyle(color: Colors.white),
+      ),
+    ),
+  ),
+
+  const SizedBox(height: 10),
+
+  if (imagenesSeleccionadas.isNotEmpty)
+    Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: imagenesSeleccionadas.map((img) {
+        return Container(
+          width: 90,
+          height: 90,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            image: DecorationImage(
+  image: kIsWeb
+      ? NetworkImage(img.path) as ImageProvider
+      : FileImage(File(img.path)),
+  fit: BoxFit.cover,
+),
+          ),
+        );
+      }).toList(),
+    ),
+
+  const SizedBox(height: 15),
+
+  TextFormField(
+    controller: laboratorioUrl,
+    decoration: const InputDecoration(
+      labelText: "Link Laboratorio/Radiografía",
+      border: OutlineInputBorder(),
+      prefixIcon: Icon(Icons.link),
+    ),
+  ),
+],
+
 
                   const SizedBox(height: 25),
 

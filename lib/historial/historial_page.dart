@@ -26,7 +26,7 @@ class _HistorialPageState extends State<HistorialPage> {
   final ScrollController _horizontalController = ScrollController();
   Timer? _debounce;
   double pdfProgress = 0;
-  
+  bool refreshing = false;
   List<Map<String, dynamic>> historial = [];
   Map<String, Map<String, dynamic>> clientesMap = {};
   DocumentSnapshot? lastDoc;
@@ -49,25 +49,16 @@ bool searchCacheReady = false;
     historial.clear();
   });
 
-  // Filtro de 7 días para no saturar
-  DateTime haceUnaSemana = DateTime.now().subtract(const Duration(days: 7));
-
   final snap = await FirebaseFirestore.instance
-      .collection("historial_v2") // Asegúrate que sea historial
-      .where("fecha_registro", isGreaterThanOrEqualTo: haceUnaSemana)
-      .orderBy("fecha_registro", descending: true)
+      .collection("clientes") // Asegúrate que sea historial
       .limit(50)
       .get();
 
   if (snap.docs.isNotEmpty) {
     lastDoc = snap.docs.last;
-    // Mapeamos los datos asegurando que el ID del documento se guarde
-    historial = snap.docs.map((doc) {
-      final data = doc.data();
-      data["id"] = doc.id; // Importante para el botón de "Ver Comprobante"
-      return data;
-    }).toList();
   }
+
+  historial = snap.docs.map((doc) => doc.data()).toList();
 
   setState(() => loading = false);
 }
@@ -97,21 +88,83 @@ bool searchCacheReady = false;
   setState(() => loadingMore = false);
 }
 
-  @override
-  void initState() {
-    super.initState();
-    _load();
-    Future.microtask(() async {
-    await _loadSearchCache();
+
+Future<List<Map<String, dynamic>>> getAllHistorial() async {
+  final snapshot = await FirebaseFirestore.instance
+      .collection("clientes")
+      .get();
+
+  return snapshot.docs.map((doc) {
+    final c = doc.data();
+
+    return {
+      "nombre_mascota": c["nombre_mascota"] ?? "",
+      "raza": c["raza"] ?? "",
+      "color": c["color"] ?? "",
+      "especie": c["especie"] ?? "",
+      "sexo": c["sexo"] ?? "",
+      "fechanac": c["fechanac"] ?? "",
+      "nombre_dueno": c["nombre"] ?? "",
+      "telefono": c["telefono"] ?? "",
+      "direccion": c["direccion"] ?? "",
+      "ci": c["ci"] ?? c["dni"] ?? "",
+      "marca": c["marca_tatuaje"] ?? "",
+    };
+  }).toList();
+}
+
+
+Future<void> refreshData() async {
+
+  if (refreshing) return;
+
+  setState(() {
+    refreshing = true;
+
+    historial.clear();
+    searchResults.clear();
+
+    isSearching = false;
+
+    lastDoc = null;
+    hasMore = true;
   });
-  
-    _verticalController.addListener(() {
-  if (_verticalController.position.pixels >=
-      _verticalController.position.maxScrollExtent - 200) {
-    loadMore();
+
+  try {
+
+    await Future.wait([
+      _load(),
+      _loadSearchCache(),
+    ]);
+
+  } catch (e) {
+    debugPrint("ERROR REFRESH: $e");
   }
-});
-  }
+
+  if (!mounted) return;
+
+  setState(() {
+    refreshing = false;
+    loading = false;
+  });
+}
+
+
+  @override
+void initState() {
+  super.initState();
+
+  refreshData();
+
+  _verticalController.addListener(() {
+
+    if (_verticalController.position.pixels >=
+        _verticalController.position.maxScrollExtent - 200) {
+
+      loadMore();
+    }
+  });
+}
 
   @override
 void dispose() {
@@ -137,7 +190,7 @@ void dispose() {
       "especie": c["especie"] ?? "",
       "sexo": c["sexo"] ?? "",
       "fechanac": c["fechanac"] ?? "",
-      "nombre": c["nombre"] ?? "",
+      "nombre": c["nombre"] ??  "",
       "telefono": c["telefono"] ?? "",
       "direccion": c["direccion"] ?? "",
       "dni": c["dni"] ?? "",
@@ -278,94 +331,154 @@ final isMobile = width < 600;
   }
 
   Widget _mobileList() {
-  return ListView.builder(
-    controller: _verticalController,
-    itemCount: currentData.length,
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    itemBuilder: (_, i) {
-      final d = currentData[i];
 
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // 🔥 más separación
-        child: Card(
-          elevation: 4, // 🔥 sombra real
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+  return RefreshIndicator(
+
+    color: const Color(0xFF0054A6),
+
+    onRefresh: refreshData,
+
+    child: ListView.builder(
+      controller: _verticalController,
+      itemCount: currentData.length,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+
+      itemBuilder: (_, i) {
+
+        final d = currentData[i];
+
+        return Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 8,
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(14), // 🔥 aire interno
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
 
-                /// ================= HEADER =================
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        d["nombre_mascota"] ?? "",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+          child: Card(
+            elevation: 4,
+
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+
+                children: [
+
+                  Row(
+                    children: [
+
+                      Expanded(
+                        child: Text(
+                          d["nombre_mascota"] ?? "",
+
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
 
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF0054A6).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
+                      Container(
+                        padding:
+                            const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFF0054A6,
+                          ).withOpacity(0.1),
+
+                          borderRadius:
+                              BorderRadius.circular(6),
+                        ),
+
+                        child: Text(
+                          "ID cliente: ${d["id_cliente"]}",
+
+                          style: const TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
-                      child: Text(
-                        "ID cliente: "+d["id_cliente"],
-                        style: const TextStyle(fontSize: 12),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    "Propietario: ${d["nombre"] ?? ""}",
+                  ),
+
+                  const SizedBox(height: 4),
+
+                  Text(
+                    "Tel: ${d["telefono"] ?? ""}",
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  Align(
+                    alignment: Alignment.centerRight,
+
+                    child: ElevatedButton.icon(
+
+                      onPressed: () {
+
+                        DashboardController
+                                .selectedHistorial =
+                            d;
+
+                        DashboardController.goTo(9);
+                      },
+
+                      icon: const Icon(
+                        Icons.visibility,
+                        size: 16,
                       ),
-                    )
-                  ],
-                ),
 
-                const SizedBox(height: 10),
-
-                /// ================= INFO =================
-                Text("Propietario: ${d["nombre"] ?? ""}"),
-                const SizedBox(height: 4),
-                Text("Tel: ${d["telefono"] ?? ""}"),
-
-                const SizedBox(height: 12),
-
-                /// ================= BOTÓN =================
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      DashboardController.selectedHistorial = d;
-                      DashboardController.goTo(9);
-                    },
-                    icon: const Icon(Icons.visibility, size: 16),
-                    label: const Text(
-                      "Ver historial",
-                      style: TextStyle(fontSize: 13),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD4B170), // 🔥 tu dorado
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                      label: const Text(
+                        "Ver historial",
+                        style: TextStyle(fontSize: 13),
                       ),
-                      elevation: 2,
+
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color(0xFFD4B170),
+
+                        foregroundColor:
+                            Colors.black,
+
+                        padding:
+                            const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(8),
+                        ),
+
+                        elevation: 2,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
+        );
+      },
+    ),
   );
 }
 
@@ -529,10 +642,13 @@ final isMobile = width < 600;
                               safe(d["raza"]),
                             )),
 
-                            DataCell(cell(
+                            DataCell(
+                              
+                              cell(
                               safe(d["nombre"]),
                               w: 180,
-                            )),
+                            )
+                            ),
 
                             DataCell(cell(
                               safe(d["color"]),
@@ -646,13 +762,18 @@ final isMobile = width < 600;
 }
 
   // ================= HEADER =================
-  Widget _header(bool isMobile) {
+  // ================= HEADER =================
+Widget _header(bool isMobile) {
+
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 8),
+
     child: isMobile
+
         ? Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               const Text(
                 "LISTA CLIENTES",
                 style: TextStyle(
@@ -666,19 +787,43 @@ final isMobile = width < 600;
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
+
                 children: [
+
+                  _btnHeader(
+  refreshing
+      ? Icons.hourglass_top
+      : Icons.refresh,
+
+  refreshing
+      ? "Actualizando..."
+      : "Actualizar",
+
+  Colors.blueGrey,
+
+  refreshing
+      ? null
+      : refreshData,
+),
+
                   _btnHeader(
                     Icons.download,
                     "Descargar",
-                    Color(0xFF0054A6),
-                    generatingDownload ? null : _descargarPdf,
+                    const Color(0xFF0054A6),
+                    generatingDownload
+                        ? null
+                        : _descargarPdf,
                   ),
+
                   _btnHeader(
                     Icons.print,
                     "Imprimir",
                     Colors.green,
-                    generatingPrint ? null : _handlePrint,
+                    generatingPrint
+                        ? null
+                        : _handlePrint,
                   ),
+
                   _btnHeader(
                     Icons.add,
                     "Registrar",
@@ -689,8 +834,10 @@ final isMobile = width < 600;
               ),
             ],
           )
+
         : Row(
             children: [
+
               const Text(
                 "LISTA CLIENTES",
                 style: TextStyle(
@@ -703,19 +850,34 @@ final isMobile = width < 600;
 
               Wrap(
                 spacing: 10,
+
                 children: [
+
+                  _btnHeader(
+                    Icons.refresh,
+                    "Actualizar",
+                    Colors.blueGrey,
+                    loading ? null : refreshData,
+                  ),
+
                   _btnHeader(
                     Icons.download,
                     "Descargar",
-                    Color(0xFF0054A6),
-                    generatingDownload ? null : _descargarPdf,
+                    const Color(0xFF0054A6),
+                    generatingDownload
+                        ? null
+                        : _descargarPdf,
                   ),
+
                   _btnHeader(
                     Icons.print,
                     "Imprimir",
                     Colors.green,
-                    generatingPrint ? null : _handlePrint,
+                    generatingPrint
+                        ? null
+                        : _handlePrint,
                   ),
+
                   _btnHeader(
                     Icons.add,
                     "Registrar",
@@ -771,30 +933,6 @@ Widget _btnHeader(
   } finally {
     setState(() => generatingPrint = false);
   }
-}
-
-Future<List<Map<String, dynamic>>> getAllHistorial() async {
-  final snapshot = await FirebaseFirestore.instance
-      .collection("clientes")
-      .get();
-
-  return snapshot.docs.map((doc) {
-    final c = doc.data();
-
-    return {
-      "nombre_mascota": c["nombre_mascota"] ?? "",
-      "raza": c["raza"] ?? "",
-      "color": c["color"] ?? "",
-      "especie": c["especie"] ?? "",
-      "sexo": c["sexo"] ?? "",
-      "fechanac": c["fechanac"] ?? "",
-      "nombre_dueno": c["nombre"] ?? "", // 🔥 clave
-      "telefono": c["telefono"] ?? "",
-      "direccion": c["direccion"] ?? "",
-      "ci": c["ci"] ?? c["dni"] ?? "",
-      "marca": c["marca_tatuaje"] ?? "",
-    };
-  }).toList();
 }
 
   Widget _printButton() {

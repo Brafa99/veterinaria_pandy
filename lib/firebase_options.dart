@@ -55,7 +55,7 @@ class DefaultFirebaseOptions {
     appId: '1:233834917651:android:8be2f38945ca4f32a634e6',
     messagingSenderId: '233834917651',
     projectId: 'veterinariapandy-73c5d',
-    storageBucket: 'veterinariapandy-73c5d.firebasestorage.app',
+    storageBucket: 'veterinariapandy-73c5d.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
