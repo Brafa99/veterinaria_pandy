@@ -45,7 +45,10 @@ final picker = ImagePicker();
     debugPrint(idCliente);
 
     // 🔥 generar ID visual (como referencia)
-    previewId = idCliente;
+    previewId = FirebaseFirestore.instance
+    .collection("historial_v2")
+    .doc()
+    .id;
   }
 
   // ================= CHIP =================
@@ -239,12 +242,10 @@ Future<List<String>> subirImagenes(String historialId) async {
   @override
   Widget build(BuildContext context) {
     final ctx = DashboardController.selectedHistorial ?? {};
-
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AGREGAR REGISTRO"),
-       
-
+        title: const Text("AGREGAR REGISTRO"),      
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => DashboardController.goTo(9),
