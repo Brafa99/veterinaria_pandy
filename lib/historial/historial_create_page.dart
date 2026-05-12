@@ -52,7 +52,7 @@ final picker = ImagePicker();
     .id;
 
   clientId = idCliente;
-  
+
   }
 
 
@@ -297,7 +297,7 @@ Future<List<String>> subirImagenes(String historialId) async {
                     "Paciente: ${ctx["nombre_mascota"] ?? ""}",
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  Text("Dueño: ${ctx["nombre_dueno"] ?? ""}"),
+                  Text("Propietario: ${ctx["nombre_dueno"] ?? ctx["nombre"] ?? ""}"),
 
                   const SizedBox(height: 20),
 
