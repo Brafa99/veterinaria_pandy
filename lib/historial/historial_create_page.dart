@@ -29,6 +29,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
   String tipoPago = "";
 
   String previewId = "";
+  String clientId = "";
   bool agregarRadiografia = false;
 
 final laboratorioUrl = TextEditingController();
@@ -49,7 +50,12 @@ final picker = ImagePicker();
     .collection("historial_v2")
     .doc()
     .id;
+
+  clientId = idCliente;
+  
   }
+
+
 
   // ================= CHIP =================
   Widget optionChip({
@@ -275,7 +281,7 @@ Future<List<String>> subirImagenes(String historialId) async {
                   const SizedBox(height: 5),
 
                   TextFormField(
-                    initialValue: previewId,
+                    initialValue: clientId,
                     readOnly: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
