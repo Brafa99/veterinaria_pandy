@@ -1,11 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:veterinaria_pandy/dashboard/dashboard_controller.dart';
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:uuid/uuid.dart';
 
@@ -34,9 +32,7 @@ class _HistorialCreatePageState extends State<HistorialCreatePage> {
 
 final laboratorioUrl = TextEditingController();
 
-List<Uint8List> imagenesBytes = [];
-
-final picker = ImagePicker();
+List<PlatformFile> pdfsSeleccionados = [];
 
   @override
   void initState() {
@@ -54,8 +50,6 @@ final picker = ImagePicker();
   clientId = idCliente;
 
   }
-
-
 
   // ================= CHIP =================
   Widget optionChip({
@@ -77,169 +71,259 @@ final picker = ImagePicker();
     );
   }
 
-  Future<void> seleccionarImagenes() async {
-  final disponibles = 2 - imagenesBytes.length;
+  Future<void> seleccionarPDFs() async {
+
+  final disponibles = 5 - pdfsSeleccionados.length;
 
   if (disponibles <= 0) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Máximo 2 imágenes")),
+      const SnackBar(
+        content: Text("Máximo 5 PDFs"),
+      ),
     );
     return;
   }
 
-  final imgs = await picker.pickMultiImage(imageQuality: 85);
-
-  if (imgs.isEmpty) return;
-
-  for (final img in imgs.take(disponibles)) {
-    final bytes = await img.readAsBytes();
-    imagenesBytes.add(bytes);
-  }
-
-  setState(() {});
-}
-
-Future<Uint8List> compressImage(
-  XFile file,
-) async {
-
-  /// ================= WEB =================
-  if (kIsWeb) {
-
-    final bytes =
-        await file.readAsBytes();
-
-    final compressed =
-        await FlutterImageCompress.compressWithList(
-
-      bytes,
-
-      minWidth: 1400,
-      quality: 75,
-    );
-
-    return Uint8List.fromList(compressed);
-  }
-
-  /// ================= MOBILE =================
-
-  final result =
-      await FlutterImageCompress.compressWithFile(
-
-    file.path,
-
-    minWidth: 1400,
-    quality: 75,
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['pdf'],
+    allowMultiple: true,
+    withData: true,
   );
 
-  return Uint8List.fromList(result!);
+  if (result == null) return;
+
+  final files = result.files.take(disponibles);
+
+  setState(() {
+    pdfsSeleccionados.addAll(files);
+  });
 }
 
 
-Future<List<String>> subirImagenes(String historialId) async {
-  List<String> urls = [];
+Future<List<Map<String, dynamic>>> subirPDFs(
+  String historialId,
+) async {
 
-  for (final bytes in imagenesBytes) {
-    final fileName = const Uuid().v4();
+  List<Map<String, dynamic>> archivos = [];
+
+  for (final pdf in pdfsSeleccionados) {
+
+    if (pdf.bytes == null) continue;
+
+    final fileName =
+        "${const Uuid().v4()}.pdf";
 
     final ref = FirebaseStorage.instance
         .ref()
-        .child("historial_v2/$historialId/$fileName.jpg");
+        .child(
+          "historial_v2/$historialId/$fileName",
+        );
 
     await ref.putData(
-      bytes,
-      SettableMetadata(contentType: "image/jpeg"),
+
+      pdf.bytes!,
+
+      SettableMetadata(
+        contentType: "application/pdf",
+      ),
     );
 
-    final url = await ref.getDownloadURL();
-    urls.add(url);
+    final url =
+        await ref.getDownloadURL();
+
+    archivos.add({
+      "nombre": pdf.name,
+      "url": url,
+    });
   }
 
-  return urls;
+  return archivos;
 }
 
   Future<void> guardar() async {
+
   if (!formKey.currentState!.validate()) return;
 
   if (tipoServicio.isEmpty || tipoPago.isEmpty) {
+
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Completa servicio y pago")),
+      const SnackBar(
+        content: Text("Completa servicio y pago"),
+      ),
     );
+
     return;
   }
 
-  final ctx = DashboardController.selectedHistorial ?? {};
-  final idCliente = ctx["id_cliente"];
+  final ctx =
+      DashboardController.selectedHistorial ?? {};
+
+  final idCliente =
+      ctx["id_cliente"];
 
   if (idCliente == null) return;
 
   setState(() => loading = true);
 
   try {
-    // ================= SUBIDA DE IMÁGENES =================
-    List<String> imagenesUrls = [];
 
-    if (agregarRadiografia && imagenesBytes.isNotEmpty) {
-      imagenesUrls = await subirImagenes(previewId);
+    /// ================= PDFs =================
+    List<Map<String, dynamic>> archivosPdf = [];
+
+    if (agregarRadiografia &&
+        pdfsSeleccionados.isNotEmpty) {
+
+      archivosPdf =
+          await subirPDFs(previewId);
     }
 
-    // ================= DATA BASE HISTORIAL =================
+    /// ================= LINKS =================
+    final List<String> links = [];
+
+    if (laboratorioUrl.text
+        .trim()
+        .isNotEmpty) {
+
+      links.add(
+        laboratorioUrl.text.trim(),
+      );
+    }
+
+    /// ================= FIRESTORE =================
     await FirebaseFirestore.instance
         .collection("historial_v2")
         .doc(previewId)
         .set({
+
       "id_cliente": idCliente,
-      "nombre_mascota": ctx["nombre_mascota"] ?? "",
-      "nombre_dueno": ctx["nombre"] ?? "",
 
-      "raza": ctx["raza"] ?? "",
-      "color": ctx["color"] ?? "",
-      "especie": ctx["especie"] ?? "",
-      "sexo": ctx["sexo"] ?? "",
-      "telefono": ctx["telefono"] ?? "",
-      "direccion": ctx["direccion"] ?? "",
-      "ci": ctx["ci"] ?? "",
-      "marca": ctx["marca"] ?? "",
+      "nombre_mascota":
+          ctx["nombre_mascota"] ?? "",
 
-      "descripcion": descripcion.text.trim(),
-      "tipo_historial": tipoServicio,
-      "precioh": double.tryParse(precio.text.trim()) ?? 0,
-      "tipo_pago": tipoPago,
+      "nombre_dueno":
+          ctx["nombre"] ?? "",
 
-      "fecha_registro": FieldValue.serverTimestamp(),
-      "createdAt": FieldValue.serverTimestamp(),
+      "raza":
+          ctx["raza"] ?? "",
 
+      "color":
+          ctx["color"] ?? "",
+
+      "especie":
+          ctx["especie"] ?? "",
+
+      "sexo":
+          ctx["sexo"] ?? "",
+
+      "telefono":
+          ctx["telefono"] ?? "",
+
+      "direccion":
+          ctx["direccion"] ?? "",
+
+      "ci":
+          ctx["ci"] ?? "",
+
+      "marca":
+          ctx["marca"] ?? "",
+
+      "descripcion":
+          descripcion.text.trim(),
+
+      "tipo_historial":
+          tipoServicio,
+
+      "precioh":
+          double.tryParse(
+                precio.text.trim(),
+              ) ??
+              0,
+
+      "tipo_pago":
+          tipoPago,
+
+      "fecha_registro":
+          FieldValue.serverTimestamp(),
+
+      "createdAt":
+          FieldValue.serverTimestamp(),
+
+      /// ================= COMPATIBLE =================
       "radiografias_laboratorios": {
-        "imagenes": imagenesUrls,
-        "url": laboratorioUrl.text.trim(),
-        "updatedAt": FieldValue.serverTimestamp(),
-      },
-    }, SetOptions(merge: true)); // 🔥 IMPORTANTE
 
-    // ================= INGRESOS =================
-    final monto = double.tryParse(precio.text.trim()) ?? 0;
+        /// NUEVO
+        "archivos":
+            archivosPdf,
+
+        /// VIEJO (compatibilidad)
+        "imagenes": [],
+
+        /// VIEJO
+        "links":
+            links,
+
+        /// OPCIONAL
+        "updatedAt":
+            FieldValue.serverTimestamp(),
+      },
+
+    }, SetOptions(merge: true));
+
+    /// ================= INGRESOS =================
+    final monto =
+        double.tryParse(
+          precio.text.trim(),
+        ) ??
+        0;
 
     if (monto > 0) {
-      await FirebaseFirestore.instance.collection("ingresos").add({
+
+      await FirebaseFirestore.instance
+          .collection("ingresos")
+          .add({
+
         "monto": monto,
-        "fecha": FieldValue.serverTimestamp(),
-        "origen": "historial",
-        "id_historial": previewId,
-        "id_cliente": idCliente,
-        "tipo_pago": tipoPago,
-        "descripcion": descripcion.text.trim(),
-        "createdAt": FieldValue.serverTimestamp(),
+
+        "fecha":
+            FieldValue.serverTimestamp(),
+
+        "origen":
+            "historial",
+
+        "id_historial":
+            previewId,
+
+        "id_cliente":
+            idCliente,
+
+        "tipo_pago":
+            tipoPago,
+
+        "descripcion":
+            descripcion.text.trim(),
+
+        "createdAt":
+            FieldValue.serverTimestamp(),
       });
     }
 
     DashboardController.goTo(9);
+
   } catch (e) {
-    debugPrint("ERROR GUARDAR HISTORIAL: $e");
+
+    debugPrint(
+      "ERROR GUARDAR HISTORIAL: $e",
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Error al guardar")),
+      const SnackBar(
+        content: Text("Error al guardar"),
+      ),
     );
+
   } finally {
+
     setState(() => loading = false);
   }
 }
@@ -496,15 +580,15 @@ Container(
                     ),
                   ),
 
-                  onPressed: seleccionarImagenes,
+                  onPressed: seleccionarPDFs,
 
                   icon: const Icon(
-                    Icons.image_outlined,
+                    Icons.picture_as_pdf,
                     color: Colors.white,
                   ),
 
                   label: const Text(
-                    "Seleccionar Imágenes",
+                    "Seleccionar PDF",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -515,29 +599,64 @@ Container(
 
               const SizedBox(height: 15),
 
-              if (imagenesBytes.isNotEmpty)
-                Wrap(
-  spacing: 12,
-  runSpacing: 12,
+              if (pdfsSeleccionados.isNotEmpty)
+  Column(
+    children: pdfsSeleccionados.map((pdf) {
 
-  children: imagenesBytes.map((bytes) {
-    return Stack(
-      children: [
-        Container(
-          width: 100,
-          height: 100,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            image: DecorationImage(
-              image: MemoryImage(bytes),
-              fit: BoxFit.cover,
-            ),
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+
+        padding: const EdgeInsets.all(12),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.shade300,
           ),
         ),
-      ],
-    );
-  }).toList(),
-),
+
+        child: Row(
+          children: [
+
+            const Icon(
+              Icons.picture_as_pdf,
+              color: Colors.red,
+              size: 34,
+            ),
+
+            const SizedBox(width: 12),
+
+            Expanded(
+              child: Text(
+                pdf.name,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            IconButton(
+              onPressed: () {
+
+                setState(() {
+                  pdfsSeleccionados.remove(pdf);
+                });
+              },
+
+              icon: const Icon(
+                Icons.close,
+                color: Colors.red,
+              ),
+            ),
+          ],
+        ),
+      );
+
+    }).toList(),
+  ),
+              
               const SizedBox(height: 16),
 
               TextFormField(

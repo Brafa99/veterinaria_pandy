@@ -641,25 +641,57 @@ Widget build(BuildContext context) {
   h["radiografias_laboratorios"] ?? {},
 );
 
+/// ================= LEGACY =================
+/// Compatibilidad con historiales antiguos
+
 final List<String> imagenes =
     List<String>.from(
   radiografiaData["imagenes"] ?? [],
 );
 
-final List<String> links =
+final List<String> legacyLinks =
     List<String>.from(
   radiografiaData["links"] ?? [],
 );
 
+/// ================= NUEVA ESTRUCTURA =================
+
+final List<Map<String, dynamic>> archivos =
+    (radiografiaData["archivos"] as List? ?? [])
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+final String url =
+    (radiografiaData["url"] ?? "")
+        .toString();
+
+/// ================= VALIDACIÓN GENERAL =================
+
+final bool tieneAdjuntos =
+
+    imagenes.isNotEmpty ||
+
+    legacyLinks.isNotEmpty ||
+
+    archivos.isNotEmpty ||
+
+    url.trim().isNotEmpty;
+
 debugPrint(
-  "IMAGENES: ${imagenes.length}",
+  "PDFS: ${archivos.length}",
 );
 
 debugPrint(
-  "LINKS: ${links.length}",
+  "URL: $url",
 );
+
+debugPrint(
+  "TIENE ADJUNTOS: $tieneAdjuntos",
+);
+
+
     /// 🔥 NO TIENE NADA
-    if (imagenes.isEmpty && links.isEmpty) {
+    if (!tieneAdjuntos) {
 
       showDialog(
         context: context,
@@ -1090,7 +1122,7 @@ return SelectionArea(
 
                               const SizedBox(width: 6),
 
-ElevatedButton(
+                              ElevatedButton(
   style: ElevatedButton.styleFrom(
     backgroundColor: const Color(0xFF0054A6),
     foregroundColor: Colors.white,
@@ -1105,26 +1137,66 @@ ElevatedButton(
       h["radiografias_laboratorios"] ?? {},
     );
 
+    /// ================= LEGACY =================
+
     final List<String> imagenes =
         List<String>.from(
       radiografiaData["imagenes"] ?? [],
     );
 
-    final List<String> links =
+    final List<String> legacyLinks =
         List<String>.from(
       radiografiaData["links"] ?? [],
     );
 
+    /// ================= NUEVA ESTRUCTURA =================
+
+    final List<Map<String, dynamic>> archivos =
+        (radiografiaData["archivos"] as List? ?? [])
+            .map(
+              (e) => Map<String, dynamic>.from(e),
+            )
+            .toList();
+
+    final String url =
+        (radiografiaData["url"] ?? "")
+            .toString();
+
+    /// ================= VALIDACIÓN GENERAL =================
+
+    final bool tieneAdjuntos =
+
+        imagenes.isNotEmpty ||
+
+        legacyLinks.isNotEmpty ||
+
+        archivos.isNotEmpty ||
+
+        url.trim().isNotEmpty;
+
     debugPrint(
-      "IMAGENES WEB: ${imagenes.length}",
+      "IMAGENES: ${imagenes.length}",
     );
 
     debugPrint(
-      "LINKS WEB: ${links.length}",
+      "LEGACY LINKS: ${legacyLinks.length}",
+    );
+
+    debugPrint(
+      "PDFS: ${archivos.length}",
+    );
+
+    debugPrint(
+      "URL: $url",
+    );
+
+    debugPrint(
+      "TIENE ADJUNTOS: $tieneAdjuntos",
     );
 
     /// 🔥 NO TIENE NADA
-    if (imagenes.isEmpty && links.isEmpty) {
+
+    if (!tieneAdjuntos) {
 
       showDialog(
         context: context,
@@ -1182,6 +1254,7 @@ ElevatedButton(
     }
 
     /// 🔥 TIENE DATOS
+
     Navigator.push(
       context,
 
@@ -1198,7 +1271,7 @@ ElevatedButton(
   child: const Text(
     "Radiografías/Laboratorios",
   ),
-),
+)
 
 
                             ],

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -30,19 +31,27 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
 
   String tipoServicio = "";
   String tipoPago = "";
-  bool habilitarRadiografia = false;
-  final picker = ImagePicker();
+
+
   bool agregarRadiografia = false;
   final laboratorioUrl = TextEditingController();
-  List<XFile> nuevasImagenes = [];
-  List<String> imagenesExistentes = [];
-  List<String> linksExistentes = [];
+List<PlatformFile> nuevosPDFs = [];
+
+List<Map<String, dynamic>> archivosExistentes = []; 
 
   @override
   void initState() {
     super.initState();
     _load();
   }
+
+  @override
+void dispose() {
+  descripcion.dispose();
+  precio.dispose();
+  laboratorioUrl.dispose();
+  super.dispose();
+}
 
   // ================= LOAD =================
   Future<void> _load() async {
@@ -53,7 +62,7 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
       .get();
 
   final d = doc.data();
-  habilitarRadiografia = true;
+
 
   if (d == null) return;
 
@@ -77,20 +86,21 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
     tipoPago =
         (d["tipo_pago"] ?? "").toString();
 
-    imagenesExistentes =
-        List<String>.from(
-      radiografiaData["imagenes"] ?? [],
-    );
+    archivosExistentes =
+    (radiografiaData["archivos"] as List? ?? [])
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
 
-    linksExistentes =
-        List<String>.from(
-      radiografiaData["links"] ?? [],
-    );
+    laboratorioUrl.text =
+    (radiografiaData["url"] ?? "")
+        .toString();
 
     agregarRadiografia =
-        imagenesExistentes.isNotEmpty ||
-            linksExistentes.isNotEmpty;
+    archivosExistentes.isNotEmpty ||
+    laboratorioUrl.text.isNotEmpty;
   });
+
+  
 }
 
   // ================= GUARDAR =================
@@ -105,24 +115,16 @@ class _HistorialFormPageState extends State<HistorialFormPage> {
     }
 
     setState(() => loading = true);
-    final nuevasUrls =
-    await subirImagenes();
+    
+    final nuevosArchivos =
+    await subirPDFs();
 
-final todasLasImagenes = [
-  ...imagenesExistentes,
-  ...nuevasUrls,
+final todosLosArchivos = [
+
+  ...archivosExistentes,
+
+  ...nuevosArchivos,
 ];
-
-final todosLosLinks = [
-  ...linksExistentes,
-];
-
-if (laboratorioUrl.text.trim().isNotEmpty) {
-
-  todosLosLinks.add(
-    laboratorioUrl.text.trim(),
-  );
-}
 
     try {
       await FirebaseFirestore.instance
@@ -147,16 +149,25 @@ if (laboratorioUrl.text.trim().isNotEmpty) {
 
   "radiografias_laboratorios": {
 
-    "imagenes":
-        todasLasImagenes,
+  "archivos":
+      todosLosArchivos,
 
-    "links":
-        todosLosLinks,
-  },
+  "url":
+      laboratorioUrl.text.trim(),
+
+  "updatedAt":
+      FieldValue.serverTimestamp(),
+},
 
   "updatedAt":
       FieldValue.serverTimestamp(),
 });
+
+if (mounted) {
+  setState(() {
+    nuevosPDFs.clear();
+  });
+}
 
       DashboardController.goTo(9);
 
@@ -189,121 +200,92 @@ if (laboratorioUrl.text.trim().isNotEmpty) {
     );
   }
 
-  Future<void> seleccionarImagenes() async {
+
+Future<void> seleccionarPDFs() async {
 
   final totalActual =
-      imagenesExistentes.length +
-      nuevasImagenes.length;
+      archivosExistentes.length +
+      nuevosPDFs.length;
 
-  if (totalActual >= 2) {
+  if (totalActual >= 5) {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text(
-          "Máximo 2 imágenes",
-        ),
+        content: Text("Máximo 5 PDFs"),
       ),
     );
 
     return;
   }
 
-  final imgs = await picker.pickMultiImage();
+  final result =
+      await FilePicker.platform.pickFiles(
 
-  if (imgs.isEmpty) return;
+    type: FileType.custom,
+    allowedExtensions: ['pdf'],
+    allowMultiple: true,
+    withData: true,
+  );
 
-  final disponibles = 2 - totalActual;
+  if (result == null) return;
+
+  final disponibles = 5 - totalActual;
 
   setState(() {
 
-    nuevasImagenes.addAll(
-      imgs.take(disponibles),
+    nuevosPDFs.addAll(
+      result.files.take(disponibles),
     );
   });
 }
 
+Future<List<Map<String, dynamic>>> subirPDFs() async {
 
-Future<Uint8List> compressImage(
-  XFile file,
-) async {
+  List<Map<String, dynamic>> archivos = [];
 
-  if (kIsWeb) {
-
-    return await file.readAsBytes();
-  }
-
-  final result =
-      await FlutterImageCompress.compressWithFile(
-
-    file.path,
-
-    minWidth: 1200,
-    quality: 70,
-  );
-
-  return Uint8List.fromList(result!);
-}
-
-
-Future<List<String>> subirImagenes() async {
-
-  List<String> urls = [];
-
-  for (final img in nuevasImagenes) {
+  for (final pdf in nuevosPDFs) {
 
     try {
 
-      debugPrint("INICIANDO SUBIDA");
-
-      final imageBytes =
-          await compressImage(img);
-
-      debugPrint(
-        "BYTES OK: ${imageBytes.length}",
-      );
+      if (pdf.bytes == null || pdf.bytes!.isEmpty) {
+  continue;
+}
 
       final fileName =
-          const Uuid().v4();
+          "${const Uuid().v4()}.pdf";
 
-      /// ✅ STORAGE NORMAL
       final ref = FirebaseStorage.instance
           .ref()
           .child(
-            "historial_v2/${widget.historialId}/$fileName.jpg",
+            "historial_v2/${widget.historialId}/$fileName",
           );
 
-      debugPrint("SUBIENDO...");
+      await ref.putData(
 
-      final snapshot =
-          await ref.putData(
-
-        imageBytes,
+        pdf.bytes!,
 
         SettableMetadata(
-          contentType: "image/jpeg",
+          contentType: "application/pdf",
         ),
-      );
-
-      debugPrint(
-        "SUBIDA OK: ${snapshot.state}",
       );
 
       final url =
           await ref.getDownloadURL();
 
-      debugPrint("URL OK: $url");
-
-      urls.add(url);
+      archivos.add({
+        "nombre": pdf.name,
+        "url": url,
+      });
 
     } catch (e) {
 
       debugPrint(
-        "ERROR SUBIENDO IMAGEN: $e",
+        "ERROR SUBIENDO PDF: $e",
       );
     }
   }
 
-  return urls;
+  return archivos;
 }
 
   // ================= UI =================
@@ -491,270 +473,214 @@ Container(
 if (agregarRadiografia) ...[
 
   AnimatedContainer(
-  duration: const Duration(milliseconds: 250),
+    duration: const Duration(milliseconds: 250),
 
-  margin: const EdgeInsets.only(top: 14),
+    margin: const EdgeInsets.only(top: 14),
 
-  padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(16),
 
-  decoration: BoxDecoration(
-    color: Colors.white,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
 
-    borderRadius: BorderRadius.circular(16),
-
-    border: Border.all(
-      color: Colors.grey.shade300,
-    ),
-  ),
-
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-
-      const Row(
-        children: [
-
-          Icon(
-            Icons.folder_open,
-            color: Color(0xFF0054A6),
-          ),
-
-          SizedBox(width: 8),
-
-          Text(
-            "Archivos adjuntos",
-
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-        ],
+      border: Border.all(
+        color: Colors.grey.shade300,
       ),
-
-      const SizedBox(height: 18),
-
-      // TODO tu contenido actual aquí
-    ],
-  ),
-),
-
-  const SizedBox(height: 15),
-
-  /// ================= IMÁGENES EXISTENTES =================
-  /// ================= IMÁGENES EXISTENTES =================
-if (imagenesExistentes.isNotEmpty) ...[
-
-  const Text(
-    "Imágenes actuales",
-    style: TextStyle(
-      fontWeight: FontWeight.bold,
     ),
-  ),
 
-  const SizedBox(height: 10),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
 
-  Wrap(
-    spacing: 10,
-    runSpacing: 10,
+        const Row(
+          children: [
 
-    children: imagenesExistentes.map((img) {
+            Icon(
+              Icons.folder_open,
+              color: Color(0xFF0054A6),
+            ),
 
-      return Stack(
-        children: [
+            SizedBox(width: 8),
 
-          ClipRRect(
-  borderRadius: BorderRadius.circular(12),
+            Text(
+              "Archivos PDF adjuntos",
 
-  child: Image.network(
-    img,
-
-    width: 110,
-    height: 110,
-    fit: BoxFit.cover,
-
-    gaplessPlayback: true,
-
-    // 🔥 CLAVE PARA WEB (esto es lo que te falta)
-    webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-
-    loadingBuilder: (context, child, progress) {
-      if (progress == null) return child;
-
-      return const SizedBox(
-        width: 110,
-        height: 110,
-        child: Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      );
-    },
-
-    errorBuilder: (context, error, stackTrace) {
-      debugPrint("GRID IMAGE ERROR: $error");
-
-      return Container(
-        width: 110,
-        height: 110,
-        color: Colors.grey.shade200,
-        child: const Icon(Icons.broken_image),
-      );
-    },
-  ),
-),
-
-          Positioned(
-            right: 0,
-            top: 0,
-
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  imagenesExistentes.remove(img);
-                });
-              },
-
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                padding: const EdgeInsets.all(4),
-
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 18,
-                ),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
               ),
             ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+
+        /// ================= PDFs EXISTENTES =================
+        if (archivosExistentes.isNotEmpty) ...[
+
+          const Text(
+            "PDFs actuales",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
+
+          const SizedBox(height: 10),
+
+          ...archivosExistentes.map((pdf) {
+
+            return Card(
+
+              child: ListTile(
+
+                leading: const Icon(
+                  Icons.picture_as_pdf,
+                  color: Colors.red,
+                ),
+
+                title: Text(
+                  pdf["nombre"] ?? "PDF",
+                ),
+
+                subtitle: Text(
+                  pdf["url"] ?? "",
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                trailing: IconButton(
+
+                  icon: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+
+                  onPressed: () {
+
+                    setState(() {
+
+                      archivosExistentes.remove(pdf);
+                    });
+                  },
+                ),
+              ),
+            );
+
+          }),
         ],
-      );
-    }).toList(),
-  ),
 
-  const SizedBox(height: 20),
-],
+        const SizedBox(height: 15),
 
-  /// ================= NUEVAS =================
-  ElevatedButton.icon(
+        /// ================= NUEVOS PDFs =================
+        ElevatedButton.icon(
 
-    style: ElevatedButton.styleFrom(
-      backgroundColor:
-          const Color(0xFF0054A6),
-    ),
-
-    onPressed: seleccionarImagenes,
-
-    icon: const Icon(
-      Icons.image,
-      color: Colors.white,
-    ),
-
-    label: const Text(
-      "Agregar imágenes (Máximo 2)",
-      style: TextStyle(
-        color: Colors.white,
-      ),
-    ),
-  ),
-
-  const SizedBox(height: 12),
-
-  if (nuevasImagenes.isNotEmpty)
-
-    Wrap(
-      spacing: 10,
-      runSpacing: 10,
-
-      children:
-          nuevasImagenes.map((img) {
-
-        return Container(
-          width: 110,
-          height: 110,
-
-          decoration: BoxDecoration(
-            borderRadius:
-                BorderRadius.circular(12),
-
-            image: DecorationImage(
-
-              image: kIsWeb
-                  ? NetworkImage(img.path)
-                  : FileImage(
-                      File(img.path),
-                    ) as ImageProvider,
-
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-      }).toList(),
-    ),
-
-  const SizedBox(height: 20),
-
-  /// ================= LINKS =================
-  if (linksExistentes.isNotEmpty) ...[
-
-    const Text(
-      "Links actuales",
-      style: TextStyle(
-        fontWeight: FontWeight.bold,
-      ),
-    ),
-
-    const SizedBox(height: 10),
-
-    ...linksExistentes.map((link) {
-
-      return Card(
-
-        child: ListTile(
-
-          leading:
-              const Icon(Icons.link),
-
-          title: Text(
-            link,
-            maxLines: 1,
-            overflow:
-                TextOverflow.ellipsis,
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                const Color(0xFF0054A6),
           ),
 
-          trailing: IconButton(
+          onPressed: seleccionarPDFs,
 
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
+          icon: const Icon(
+            Icons.picture_as_pdf,
+            color: Colors.white,
+          ),
+
+          label: const Text(
+            "Agregar PDFs",
+            style: TextStyle(
+              color: Colors.white,
             ),
-
-            onPressed: () {
-
-              setState(() {
-
-                linksExistentes
-                    .remove(link);
-              });
-            },
           ),
         ),
-      );
-    }),
-  ],
 
-  const SizedBox(height: 15),
+        const SizedBox(height: 12),
 
-  TextFormField(
-    controller: laboratorioUrl,
+        if (nuevosPDFs.isNotEmpty)
 
-    decoration: const InputDecoration(
-      labelText:
-          "Nuevo link laboratorio",
-      border: OutlineInputBorder(),
-      prefixIcon: Icon(Icons.link),
+          Column(
+            children: nuevosPDFs.map((pdf) {
+
+              return Container(
+
+                margin: const EdgeInsets.only(bottom: 10),
+
+                padding: const EdgeInsets.all(12),
+
+                decoration: BoxDecoration(
+                  color: Colors.white,
+
+                  borderRadius:
+                      BorderRadius.circular(12),
+
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+
+                child: Row(
+                  children: [
+
+                    const Icon(
+                      Icons.picture_as_pdf,
+                      color: Colors.red,
+                      size: 34,
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    Expanded(
+                      child: Text(
+                        pdf.name,
+
+                        overflow:
+                            TextOverflow.ellipsis,
+
+                        style: const TextStyle(
+                          fontWeight:
+                              FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                    IconButton(
+
+                      onPressed: () {
+
+                        setState(() {
+
+                          nuevosPDFs.remove(pdf);
+                        });
+                      },
+
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+            }).toList(),
+          ),
+
+        const SizedBox(height: 20),
+
+        /// ================= LINK =================
+        TextFormField(
+          controller: laboratorioUrl,
+
+          decoration: const InputDecoration(
+            labelText:
+                "Link laboratorio",
+
+            border: OutlineInputBorder(),
+
+            prefixIcon: Icon(Icons.link),
+          ),
+        ),
+      ],
     ),
   ),
 ],

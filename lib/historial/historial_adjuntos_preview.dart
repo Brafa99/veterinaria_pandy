@@ -18,11 +18,34 @@ Widget build(BuildContext context) {
   final radiografiaData =
       data["radiografias_laboratorios"] ?? {};
 
-  final List imagenes =
-      radiografiaData["imagenes"] ?? [];
+  /// ================= LEGACY (NO BORRAR AÚN) =================
+/// Historiales antiguos todavía usan:
+/// imagenes[] y links[]
+/// Se mantiene por compatibilidad histórica.
 
-  final List links =
-      radiografiaData["links"] ?? [];
+final List imagenes =
+    radiografiaData["imagenes"] ?? [];
+
+final List legacyLinks =
+    radiografiaData["links"] ?? [];
+
+/// ================= NUEVA ESTRUCTURA =================
+
+final List<Map<String, dynamic>> archivos =
+    (radiografiaData["archivos"] as List? ?? [])
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+final String url =
+    (radiografiaData["url"] ?? "")
+        .toString();
+
+/// ================= LINKS UNIFICADOS =================
+
+final List<String> links =
+    legacyLinks
+        .map((e) => e.toString())
+        .toList();
 
   final width =
       MediaQuery.of(context).size.width;
@@ -194,9 +217,9 @@ Widget build(BuildContext context) {
                       children: [
 
                         _infoBadge(
-                          Icons.image,
-                          "${imagenes.length} imágenes",
-                        ),
+  Icons.picture_as_pdf,
+  "${archivos.length} PDFs",
+),
 
                         _infoBadge(
                           Icons.link,
@@ -281,300 +304,436 @@ Widget build(BuildContext context) {
 
               /// ================= IMÁGENES =================
 
-              if (imagenes.isNotEmpty) ...[
+//               if (imagenes.isNotEmpty) ...[
 
-                const SizedBox(height: 28),
+//                 const SizedBox(height: 28),
 
-                const Text(
-                  "Imágenes Adjuntas",
+//                 const Text(
+//                   "Imágenes Adjuntas",
 
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+//                   style: TextStyle(
+//                     fontSize: 22,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
 
-                const SizedBox(height: 18),
+//                 const SizedBox(height: 18),
 
-                GridView.builder(
+//                 GridView.builder(
 
-                  shrinkWrap: true,
+//                   shrinkWrap: true,
 
-                  physics:
-                      const NeverScrollableScrollPhysics(),
+//                   physics:
+//                       const NeverScrollableScrollPhysics(),
 
-                  itemCount: imagenes.length,
+//                   itemCount: imagenes.length,
 
-                  gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
+//                   gridDelegate:
+//                       SliverGridDelegateWithFixedCrossAxisCount(
 
-                    crossAxisCount:
-                        isMobile ? 1 : 3,
+//                     crossAxisCount:
+//                         isMobile ? 1 : 3,
 
-                    crossAxisSpacing: 18,
-                    mainAxisSpacing: 18,
+//                     crossAxisSpacing: 18,
+//                     mainAxisSpacing: 18,
 
-                    childAspectRatio:
-                        isMobile ? 1.1 : 1.25,
-                  ),
+//                     childAspectRatio:
+//                         isMobile ? 1.1 : 1.25,
+//                   ),
 
-                  itemBuilder: (_, i) {
+//                   itemBuilder: (_, i) {
 
-                    final originalImg = imagenes[i];
+//                     final originalImg = imagenes[i];
 
-final img = originalImg.toString();
+// final img = originalImg.toString();
 
-                    return InkWell(
+//                     return InkWell(
 
-                      borderRadius:
-                          BorderRadius.circular(18),
+//                       borderRadius:
+//                           BorderRadius.circular(18),
 
-                      onTap: () {
+//                       onTap: () {
 
-                        showDialog(
-                          context: context,
+//                         showDialog(
+//                           context: context,
 
-                          builder: (_) {
+//                           builder: (_) {
 
-                            return Dialog(
+//                             return Dialog(
 
-                              backgroundColor:
-                                  Colors.black,
+//                               backgroundColor:
+//                                   Colors.black,
 
-                              insetPadding:
-                                  const EdgeInsets.all(20),
+//                               insetPadding:
+//                                   const EdgeInsets.all(20),
 
-                              child: Stack(
+//                               child: Stack(
 
-                                children: [
+//                                 children: [
 
-                                  InteractiveViewer(
-                                    child: Image.network(
-  img,
+//                                   InteractiveViewer(
+//                                     child: Image.network(
+//   img,
 
-  fit: BoxFit.cover,
+//   fit: BoxFit.cover,
 
-  webHtmlElementStrategy:
-      WebHtmlElementStrategy.prefer,
+//   webHtmlElementStrategy:
+//       WebHtmlElementStrategy.prefer,
 
-  loadingBuilder:
-      (context, child, loadingProgress) {
+//   loadingBuilder:
+//       (context, child, loadingProgress) {
 
-    if (loadingProgress == null) {
-      return child;
-    }
+//     if (loadingProgress == null) {
+//       return child;
+//     }
 
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  },
+//     return const Center(
+//       child: CircularProgressIndicator(),
+//     );
+//   },
 
-  errorBuilder:
-      (context, error, stackTrace) {
+//   errorBuilder:
+//       (context, error, stackTrace) {
 
-    debugPrint(
-      "ERROR IMAGE: $error",
-    );
+//     debugPrint(
+//       "ERROR IMAGE: $error",
+//     );
+
+//     return Container(
+
+//       color: Colors.grey.shade200,
+
+//       child: const Center(
+
+//         child: Column(
+//           mainAxisAlignment:
+//               MainAxisAlignment.center,
+
+//           children: [
+
+//             Icon(
+//               Icons.broken_image,
+//               size: 45,
+//               color: Colors.grey,
+//             ),
+
+//             SizedBox(height: 10),
+
+//             Text(
+//               "No se pudo cargar la imagen",
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   },
+// )
+// ),
+
+//                                   Positioned(
+//                                     right: 10,
+//                                     top: 10,
+
+//                                     child: IconButton(
+
+//                                       onPressed: () {
+
+//                                         Navigator.pop(context);
+//                                       },
+
+//                                       icon: const Icon(
+//                                         Icons.close,
+//                                         color: Colors.white,
+//                                       ),
+//                                     ),
+//                                   ),
+//                                 ],
+//                               ),
+//                             );
+//                           },
+//                         );
+//                       },
+
+//                       child: Container(
+
+//                         decoration: BoxDecoration(
+
+//                           borderRadius:
+//                               BorderRadius.circular(18),
+
+//                           boxShadow: [
+//                             BoxShadow(
+//                               color: Colors.black
+//                                   .withOpacity(0.08),
+
+//                               blurRadius: 10,
+//                             ),
+//                           ],
+//                         ),
+
+//                         child: ClipRRect(
+
+//                           borderRadius:
+//                               BorderRadius.circular(18),
+
+//                           child: Stack(
+
+//                             fit: StackFit.expand,
+
+//                             children: [
+
+//                               Image.network(
+//   img,
+
+//   fit: BoxFit.contain,
+
+//   webHtmlElementStrategy:
+//       WebHtmlElementStrategy.prefer,
+
+//   loadingBuilder:
+//       (context, child, loadingProgress) {
+
+//     if (loadingProgress == null) {
+//       return child;
+//     }
+
+//     return const Center(
+//       child: CircularProgressIndicator(),
+//     );
+//   },
+
+//   errorBuilder:
+//       (context, error, stackTrace) {
+
+//     debugPrint(
+//       "ERROR DIALOG IMAGE: $error",
+//     );
+
+//     return const Center(
+
+//       child: Column(
+//         mainAxisAlignment:
+//             MainAxisAlignment.center,
+
+//         children: [
+
+//           Icon(
+//             Icons.broken_image,
+//             color: Colors.white,
+//             size: 60,
+//           ),
+
+//           SizedBox(height: 12),
+
+//           Text(
+//             "No se pudo visualizar la imagen",
+//             style: TextStyle(
+//               color: Colors.white,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   },
+// ),
+
+//                               Positioned(
+
+//                                 bottom: 0,
+//                                 left: 0,
+//                                 right: 0,
+
+//                                 child: Container(
+
+//                                   padding:
+//                                       const EdgeInsets.all(10),
+
+//                                   decoration: BoxDecoration(
+
+//                                     gradient:
+//                                         LinearGradient(
+
+//                                       begin:
+//                                           Alignment.topCenter,
+
+//                                       end:
+//                                           Alignment.bottomCenter,
+
+//                                       colors: [
+//                                         Colors.transparent,
+//                                         Colors.black
+//                                             .withOpacity(0.7),
+//                                       ],
+//                                     ),
+//                                   ),
+
+//                                   child: const Row(
+
+//                                     children: [
+
+//                                       Icon(
+//                                         Icons.zoom_in,
+//                                         color: Colors.white,
+//                                         size: 18,
+//                                       ),
+
+//                                       SizedBox(width: 6),
+
+//                                       Text(
+//                                         "Ver imagen",
+
+//                                         style: TextStyle(
+//                                           color: Colors.white,
+//                                         ),
+//                                       ),
+//                                     ],
+//                                   ),
+//                                 ),
+//                               ),
+//                             ],
+//                           ),
+//                         ),
+//                       ),
+//                     );
+//                   },
+//                 ),
+//               ],
+
+/// ================= PDFs =================
+
+if (archivos.isNotEmpty) ...[
+
+  const SizedBox(height: 30),
+
+  const Text(
+    "Documentos PDF",
+
+    style: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+
+  const SizedBox(height: 16),
+
+  ...archivos.map((pdf) {
+
+    final nombre =
+        (pdf["nombre"] ?? "Documento PDF")
+            .toString();
+
+    final archivoUrl =
+        (pdf["url"] ?? "")
+            .toString();
 
     return Container(
 
-      color: Colors.grey.shade200,
+      margin:
+          const EdgeInsets.only(bottom: 14),
 
-      child: const Center(
+      decoration: BoxDecoration(
 
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
+        color: Colors.white,
 
-          children: [
+        borderRadius:
+            BorderRadius.circular(18),
 
-            Icon(
-              Icons.broken_image,
-              size: 45,
-              color: Colors.grey,
-            ),
-
-            SizedBox(height: 10),
-
-            Text(
-              "No se pudo cargar la imagen",
-            ),
-          ],
+        border: Border.all(
+          color: Colors.grey.shade300,
         ),
-      ),
-    );
-  },
-)
-),
 
-                                  Positioned(
-                                    right: 10,
-                                    top: 10,
+        boxShadow: [
+          BoxShadow(
+            color:
+                Colors.black.withOpacity(0.04),
 
-                                    child: IconButton(
-
-                                      onPressed: () {
-
-                                        Navigator.pop(context);
-                                      },
-
-                                      icon: const Icon(
-                                        Icons.close,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-
-                      child: Container(
-
-                        decoration: BoxDecoration(
-
-                          borderRadius:
-                              BorderRadius.circular(18),
-
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(0.08),
-
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-
-                        child: ClipRRect(
-
-                          borderRadius:
-                              BorderRadius.circular(18),
-
-                          child: Stack(
-
-                            fit: StackFit.expand,
-
-                            children: [
-
-                              Image.network(
-  img,
-
-  fit: BoxFit.contain,
-
-  webHtmlElementStrategy:
-      WebHtmlElementStrategy.prefer,
-
-  loadingBuilder:
-      (context, child, loadingProgress) {
-
-    if (loadingProgress == null) {
-      return child;
-    }
-
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
-  },
-
-  errorBuilder:
-      (context, error, stackTrace) {
-
-    debugPrint(
-      "ERROR DIALOG IMAGE: $error",
-    );
-
-    return const Center(
-
-      child: Column(
-        mainAxisAlignment:
-            MainAxisAlignment.center,
-
-        children: [
-
-          Icon(
-            Icons.broken_image,
-            color: Colors.white,
-            size: 60,
-          ),
-
-          SizedBox(height: 12),
-
-          Text(
-            "No se pudo visualizar la imagen",
-            style: TextStyle(
-              color: Colors.white,
-            ),
+            blurRadius: 8,
           ),
         ],
       ),
+
+      child: ListTile(
+
+        contentPadding:
+            const EdgeInsets.symmetric(
+          horizontal: 18,
+          vertical: 14,
+        ),
+
+        leading: Container(
+
+          padding: const EdgeInsets.all(12),
+
+          decoration: BoxDecoration(
+
+            color: Colors.red
+                .withOpacity(0.08),
+
+            borderRadius:
+                BorderRadius.circular(14),
+          ),
+
+          child: const Icon(
+            Icons.picture_as_pdf,
+            color: Colors.red,
+            size: 30,
+          ),
+        ),
+
+        title: Text(
+
+          nombre,
+
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
+
+        subtitle: const Padding(
+          padding: EdgeInsets.only(top: 4),
+
+          child: Text(
+            "Abrir documento PDF",
+          ),
+        ),
+
+        trailing: Container(
+
+          padding: const EdgeInsets.all(8),
+
+          decoration: BoxDecoration(
+
+            color: const Color(0xFF0054A6)
+                .withOpacity(0.08),
+
+            borderRadius:
+                BorderRadius.circular(10),
+          ),
+
+          child: const Icon(
+            Icons.open_in_new,
+            color: Color(0xFF0054A6),
+          ),
+        ),
+
+        onTap: () async {
+
+          final uri =
+              Uri.parse(archivoUrl);
+
+          await launchUrl(
+
+            uri,
+
+            mode:
+                LaunchMode.platformDefault
+          );
+        },
+      ),
     );
-  },
-),
-
-                              Positioned(
-
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-
-                                child: Container(
-
-                                  padding:
-                                      const EdgeInsets.all(10),
-
-                                  decoration: BoxDecoration(
-
-                                    gradient:
-                                        LinearGradient(
-
-                                      begin:
-                                          Alignment.topCenter,
-
-                                      end:
-                                          Alignment.bottomCenter,
-
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black
-                                            .withOpacity(0.7),
-                                      ],
-                                    ),
-                                  ),
-
-                                  child: const Row(
-
-                                    children: [
-
-                                      Icon(
-                                        Icons.zoom_in,
-                                        color: Colors.white,
-                                        size: 18,
-                                      ),
-
-                                      SizedBox(width: 6),
-
-                                      Text(
-                                        "Ver imagen",
-
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ],
+  }),
+],
 
               /// ================= LINKS =================
 
@@ -672,7 +831,7 @@ final img = originalImg.toString();
                           uri,
 
                           mode: LaunchMode
-                              .externalApplication,
+                              .platformDefault
                         );
                       },
                     ),

@@ -26,6 +26,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   uuid: ^4.5.1
   url_launcher: ^6.3.0
+  file_picker: ^10.1.9
   cached_network_image: ^3.3.1
   flutter_localizations:
     sdk: flutter
